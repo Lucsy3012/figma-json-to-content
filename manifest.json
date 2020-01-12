@@ -2,6 +2,6 @@
   "name": "JSON → Content",
   "id": "797778700190966062",
   "api": "1.0.0",
-  "main": "code.js",
-  "ui": "ui.html"
+  "main": "src/code.js",
+  "ui": "src/ui.html"
 }

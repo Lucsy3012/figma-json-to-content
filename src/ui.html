@@ -3,7 +3,7 @@
     <!-- Loading content -->
     <div class="container" id="main">
         <div class="loading-panel">
-            <input id="data" placeholder="https://path.com/to/data.json">
+            <input id="data" placeholder="https://path.com/to/data.json" value="../example/breaking-bad-season-one.json">
             <button id="load">Load</button>
         </div>
         <p class="introduction-text" id="intro">Overwrite multiple text layers with real and coherent, yet randomized data. Simply load your JSON to set up some content. Then select a group or a frame and click “Fill with data”. The generator will pick a random entry but keeps the set together.</p>
@@ -35,12 +35,15 @@
     .primary {
         --accent-color: #282c84;
         --accent-color-hover: #0b107e;
-        --accent-color-fade: rgba(40, 44, 132, 0.11);
+        --accent-color-light: rgba(40, 44, 132, 0.75);
+        --accent-color-fade: rgba(40, 44, 132, 0.1);
         --button-color-text: #fff;
     }
     .error {
         --accent-color: #bb1919;
-        --accent-color-fade: rgba(187, 25, 25, 0.16);
+        --accent-color-hover: #911717;
+        --accent-color-light: rgba(187, 25, 25, 0.75);
+        --accent-color-fade: rgba(187, 25, 25, 0.15);
         --button-color-text: #fff;
     }
 
@@ -102,6 +105,7 @@
         border: 1px solid var(--accent-color, var(--border-gray, #cdcdcd));
         border-radius: 4px;
         cursor: pointer;
+        letter-spacing: normal;
     }
     button:hover {
         color: var(--button-color-text, #fff);
@@ -198,49 +202,57 @@
         color: var(--accent-color, #000);
         background: var(--accent-color-fade, rgba(0,0,0,0.1));
     }
+
+    .msg ul {
+        margin: 5px 0;
+        padding: 0 0 0 18px;
+        color: var(--accent-color-light, rgba(0,0,0,0.75));
+    }
+
+    a {
+        color: var(--accent-color);
+    }
 </style>
 
 <script>
-
     // Direct interactions
     document.getElementById('load').onclick = () => {
-      const element = document.getElementById('data');
-      const url = element.value;
+        const element = document.getElementById('data');
+        const url = element.value;
 
-      fetch(url)
-          .then(response => {
-              return response.json();
-          })
-          .then(data => {
-              console.log(data);
+        fetch(url)
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
 
-              // if no access
-              if (data.success === false) {
-                  document.getElementById('error-msg').innerHTML = 'An error occured: You have no permission to use fetch this data.';
-              } else {
-                  // post message to figma
-                  parent.postMessage({ pluginMessage: { type: 'load', data } }, '*');
+                // if no access
+                if (data.success === false) {
+                    document.getElementById('error-msg').innerHTML = 'You have no permission to fetch this data. Please provide an URL that\'s publicly available.';
+                } else {
+                    // post message to figma
+                    parent.postMessage({ pluginMessage: { type: 'load', data } }, '*');
 
-                  // remove all entries from list
-                  document.getElementById('entries').innerHTML = '';
+                    // remove all entries from list
+                    document.getElementById('entries').innerHTML = '';
 
-                  // creates for each entry a direct link in list
-                  createEntries(data);
+                    // creates for each entry a direct link in list
+                    createEntries(data);
 
-                  // initiate action
-                  document.getElementById('entries').style.display = 'block';
-                  document.getElementById('intro').style.display = 'none';
-                  document.getElementById('fill').disabled = false;
-                  document.getElementById('error-msg').innerHTML = '';
-              }
-          })
-          .catch(error => {
-              document.getElementById('error-msg').innerHTML = 'An error occured: ' + error;
-          });
+                    // initiate action
+                    document.getElementById('entries').style.display = 'block';
+                    document.getElementById('intro').style.display = 'none';
+                    document.getElementById('fill').disabled = false;
+                    document.getElementById('error-msg').innerHTML = '';
+                }
+            })
+            .catch(error => {
+                document.getElementById('error-msg').innerHTML = 'The file could not be loaded. Please check the following steps:<ul><li>Check if the URL is correct and complete.</li><li>Check if the URL is publicly available (local files will not work).</li><li>Check if the URL provides a valid JSON file (see <a href="https://raw.githubusercontent.com/Lucsy3012/figma-json-to-content/master/example/breaking-bad-season-one.json" target="_blank" rel="nofollow">example</a>).</li></ul>';
+            });
     };
 
     document.getElementById('fill').onclick = () => {
-      parent.postMessage({ pluginMessage: { type: 'fill' } }, '*')
+        parent.postMessage({ pluginMessage: { type: 'fill' } }, '*')
     };
 
     document.getElementById('entries').addEventListener('click', function(e) {
@@ -251,7 +263,7 @@
     });
 
     document.getElementById('close').onclick = () => {
-      parent.postMessage({ pluginMessage: { type: 'close' } }, '*')
+        parent.postMessage({ pluginMessage: { type: 'close' } }, '*')
     };
 
     function createEntries(data) {
@@ -285,5 +297,4 @@
             i++;
         }
     }
-
 </script>

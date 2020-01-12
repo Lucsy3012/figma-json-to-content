@@ -31,22 +31,10 @@ figma.ui.onmessage = msg => {
     selectData(random);
   }
 
+  // Fill in specific entry
   if (msg.type === 'fill-specific') {
     getData();
     selectData(msg.index);
-  }
-
-  if (msg.type === 'create-rectangles') {
-    const nodes: SceneNode[] = [];
-    for (let i = 0; i < msg.count; i++) {
-      const rect = figma.createRectangle();
-      rect.x = i * 150;
-      rect.fills = [{type: 'SOLID', color: {r: 1, g: 0.5, b: 0}}];
-      figma.currentPage.appendChild(rect);
-      nodes.push(rect);
-    }
-    figma.currentPage.selection = nodes;
-    figma.viewport.scrollAndZoomIntoView(nodes);
   }
 
   // Close
@@ -71,6 +59,7 @@ figma.ui.onmessage = msg => {
   }
 
   function selectData(index) {
+
     // Get selection
     for (const node of figma.currentPage.selection) {
 
@@ -92,7 +81,7 @@ figma.ui.onmessage = msg => {
         for (const key of keys) {
 
           // Find elements in selection that match any key of data
-          const layers = node.findAll(node => node.name === key);
+          const layers = node.findAll(node => node.name === key && node.type === 'TEXT');
 
           // Rewrite layer text with value of each key
           for (const layer of layers) {
