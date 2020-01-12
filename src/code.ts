@@ -80,11 +80,12 @@ figma.ui.onmessage = msg => {
         // Get keys of data
         for (const key of keys) {
 
+          // Texts
           // Find elements in selection that match any key of data
-          const layers = node.findAll(node => node.name === key && node.type === 'TEXT');
+          const textLayers = node.findAll(node => node.name === key && node.type === 'TEXT');
 
           // Rewrite layer text with value of each key
-          for (const layer of layers) {
+          for (const layer of textLayers) {
             loadFontsFrom(layer);
             layer.characters = data[index][key];
           }
@@ -93,4 +94,3 @@ figma.ui.onmessage = msg => {
     }
   }
 };
-
