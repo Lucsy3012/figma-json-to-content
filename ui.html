@@ -1,0 +1,289 @@
+<body>
+
+    <!-- Loading content -->
+    <div class="container" id="main">
+        <div class="loading-panel">
+            <input id="data" placeholder="https://path.com/to/data.json">
+            <button id="load">Load</button>
+        </div>
+        <p class="introduction-text" id="intro">Overwrite multiple text layers with real and coherent, yet randomized data. Simply load your JSON to set up some content. Then select a group or a frame and click “Fill with data”. The generator will pick a random entry but keeps the set together.</p>
+        <p class="msg error" id="error-msg"></p>
+    </div>
+
+    <!-- All entries -->
+    <ul id="entries"></ul>
+
+    <!-- Footer -->
+    <div class="container-s action-panel">
+        <button id="fill" class="primary" disabled>Fill with random entry</button>
+        <button id="close">Close</button>
+    </div>
+</body>
+
+<style>
+    :root {
+        --font-family: 'Inter UI', sans-serif;
+        --font-size: 11px;
+        --line-height: 1.7;
+        --easing: cubic-bezier(0.65, 0.29, 0.41, 1.07);
+
+        --white: #fff;
+        --light-gray: #f1f1f1;
+        --border-gray: #cdcdcd;
+        --black: #000;
+    }
+    .primary {
+        --accent-color: #282c84;
+        --accent-color-hover: #0b107e;
+        --accent-color-fade: rgba(40, 44, 132, 0.11);
+        --button-color-text: #fff;
+    }
+    .error {
+        --accent-color: #bb1919;
+        --accent-color-fade: rgba(187, 25, 25, 0.16);
+        --button-color-text: #fff;
+    }
+
+    * {
+        font-family: 'Inter UI', sans-serif;
+        box-sizing: border-box;
+    }
+    body {
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 1.7;
+        letter-spacing: -0.02em;
+        color: #000;
+        margin: 0;
+        padding-bottom: 56px;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: geometricPrecision;
+    }
+    .container {
+        padding: 20px;
+    }
+    .container-s {
+        padding: 15px 20px;
+    }
+    p {
+        color: rgba(0,0,0,0.5);
+    }
+    p:empty,
+    ul:empty {
+        display: none;
+    }
+    input, button {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        transition: all .2s var(--easing, cubic-bezier(0.65, 0.29, 0.41, 1.07));
+    }
+
+    input {
+        outline: none;
+        box-shadow: none;
+        font-size: 12px;
+        font-weight: 500;
+        border: 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+        margin-right: 20px;
+        padding: 4px 0;
+    }
+
+    /* Regular Button */
+    button {
+        display: inline-block;
+        padding: 4px 11px;
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--button-color-text, #000);
+        background-color: var(--accent-color, #fff);
+        border: 1px solid var(--accent-color, var(--border-gray, #cdcdcd));
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    button:hover {
+        color: var(--button-color-text, #fff);
+        background-color: var(--accent-color-hover, #000);
+        border-color: var(--accent-color-hover, #000);
+    }
+    button:disabled {
+        color: rgba(97, 97, 97, 0.51);
+        background-color: #dbdbdb;
+        border-color: #dbdbdb;
+    }
+
+    /* Loading Panel */
+    .loading-panel {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .loading-panel input {
+        flex: auto;
+    }
+    .loading-panel button#load {
+        margin-left: auto;
+    }
+
+    /* Action Panel */
+    .action-panel {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        background-color: var(--light-gray);
+        border-top: 1px solid var(--border-gray);
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+    .action-panel button#close {
+        margin-left: auto;
+    }
+
+    /* Entries List */
+    ul#entries {
+        margin: 0;
+        padding: 0;
+        display: none;
+    }
+
+    ul#entries li {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        padding: 8px 20px;
+        background-color: var(--white, #fff);
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    ul#entries li.data-entry:hover {
+        background-color: #e6e6e6;
+        cursor: pointer;
+    }
+
+    ul#entries li > span {
+        pointer-events: none;
+    }
+
+    ul#entries li .index {
+        display: inline-block;
+        width: 28px;
+        color: rgba(0,0,0,0.5);
+    }
+
+    ul#entries li .name {
+        width: calc(100% - 28px);
+        display: inline-block;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+    }
+
+    ul#entries li:nth-child(odd) {
+        background-color: #f6f6f6;
+    }
+
+    /* Messages */
+    .msg {
+        margin: 18px 0 0;
+        padding: 6px 14px;
+        border-radius: 4px;
+        color: var(--accent-color, #000);
+        background: var(--accent-color-fade, rgba(0,0,0,0.1));
+    }
+</style>
+
+<script>
+
+    // Direct interactions
+    document.getElementById('load').onclick = () => {
+      const element = document.getElementById('data');
+      const url = element.value;
+
+      fetch(url)
+          .then(response => {
+              return response.json();
+          })
+          .then(data => {
+              console.log(data);
+
+              // if no access
+              if (data.success === false) {
+                  document.getElementById('error-msg').innerHTML = 'An error occured: You have no permission to use fetch this data.';
+              } else {
+                  // post message to figma
+                  parent.postMessage({ pluginMessage: { type: 'load', data } }, '*');
+
+                  // remove all entries from list
+                  document.getElementById('entries').innerHTML = '';
+
+                  // creates for each entry a direct link in list
+                  createEntries(data);
+
+                  // initiate action
+                  document.getElementById('entries').style.display = 'block';
+                  document.getElementById('intro').style.display = 'none';
+                  document.getElementById('fill').disabled = false;
+                  document.getElementById('error-msg').innerHTML = '';
+              }
+          })
+          .catch(error => {
+              document.getElementById('error-msg').innerHTML = 'An error occured: ' + error;
+          });
+    };
+
+    document.getElementById('fill').onclick = () => {
+      parent.postMessage({ pluginMessage: { type: 'fill' } }, '*')
+    };
+
+    document.getElementById('entries').addEventListener('click', function(e) {
+        if(e.target.matches('li.data-entry')) {
+            let index = e.target.attributes.index.textContent;
+            parent.postMessage({ pluginMessage: { type: 'fill-specific', index } }, '*')
+        }
+    });
+
+    document.getElementById('close').onclick = () => {
+      parent.postMessage({ pluginMessage: { type: 'close' } }, '*')
+    };
+
+    function createEntries(data) {
+        let i = 0;
+        for (let entry of data) {
+
+            // prepare li
+            let name;
+            let li = document.createElement('li');
+            li.classList.add('data-entry');
+            li.setAttribute('index', i);
+
+            if (entry['Name']) {
+                name = entry['Name'];
+            } else if (entry['name']) {
+                name = entry['Name'];
+            } else if (entry['Title']) {
+                name = entry['Title'];
+            } else if (entry['title']) {
+                name = entry['title'];
+            } else {
+                name = Object.values(entry)[0];
+            }
+
+            li.innerHTML =
+                '<span class="index">' + (i + 1) + '.</span>' +
+                '<span class="name">' + name + '</span>';
+
+            // append li
+            document.getElementById('entries').appendChild(li);
+            i++;
+        }
+    }
+
+</script>

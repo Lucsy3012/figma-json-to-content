@@ -1,0 +1,58 @@
+[
+  {
+    "episode": "1",
+    "title": "Pilot",
+    "releaseDate": "January 20, 2008",
+    "millionViewers": 1.41,
+    "directedBy": "Vince Gilligan",
+    "writtenBy": "Vince Gilligan"
+  },
+  {
+    "episode": "2",
+    "title": "Cat's in the Bag...",
+    "releaseDate": "January 27, 2008",
+    "millionViewers": 1.49,
+    "directedBy": "Adam Bernstein",
+    "writtenBy": "Vince Gilligan"
+  },
+  {
+    "episode": "3",
+    "title": "...And the Bag's in the River",
+    "releaseDate": "February 10, 2008",
+    "millionViewers": 1.08,
+    "directedBy": "Adam Bernstein",
+    "writtenBy": "Vince Gilligan"
+  },
+  {
+    "episode": "4",
+    "title": "Cancer Man",
+    "releaseDate": "February 17, 2008",
+    "millionViewers": 1.09,
+    "directedBy": "Jim McKay",
+    "writtenBy": "Vince Gilligan"
+  },
+  {
+    "episode": "5",
+    "title": "Gray Matter",
+    "releaseDate": "February 24, 2008",
+    "millionViewers": "N/A",
+    "directedBy": "Tricia Brock",
+    "writtenBy": "Vince Gilligan"
+  },
+  {
+    "episode": "6",
+    "title": "Crazy Handful of Nothin'",
+    "releaseDate": "March 2, 2008",
+    "millionViewers": 1.07,
+    "directedBy": "Bronwen Hughes",
+    "writtenBy": "Vince Gilligan"
+  },
+  {
+    "episode": "7",
+    "title": "A No-Rough-Stuff-Type Deal",
+    "releaseDate": "March 9, 2008",
+    "millionViewers": 1.50,
+    "directedBy": "Tim Hunter",
+    "writtenBy": "Vince Gilligan"
+  }
+]

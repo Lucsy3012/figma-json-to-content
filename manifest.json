@@ -1,0 +1,7 @@
+{
+  "name": "JSON → Content",
+  "id": "797778700190966062",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html"
+}
