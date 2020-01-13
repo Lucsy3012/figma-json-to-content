@@ -10,9 +10,6 @@
         <p class="msg error" id="error-msg"></p>
     </div>
 
-    <!-- All keys -->
-    <ul id="keys"></ul>
-
     <!-- All entries -->
     <ul id="entries"></ul>
 
@@ -96,6 +93,9 @@
         margin-right: 20px;
         padding: 4px 0;
     }
+    a {
+        color: var(--accent-color);
+    }
 
     /* Regular Button */
     button {
@@ -150,30 +150,6 @@
         margin-left: auto;
     }
 
-    /* Keys */
-    ul#keys {
-        margin: 0 0 20px;
-        padding: 0 20px;
-    }
-
-    ul#keys li {
-        display: inline-block;
-        list-style: none;
-        font-size: 11px;
-        font-style: italic;
-        color: rgba(0,0,0,0.5);
-    }
-
-    ul#keys li:after {
-        content: ", ";
-        display: inline-block;
-        padding-right: 3px;
-    }
-
-    ul#keys li:last-child:after {
-        display: none;
-    }
-
     /* Entries List */
     ul#entries {
         margin: 0;
@@ -182,22 +158,21 @@
     }
 
     ul#entries li {
+        display: block;
+        background-color: var(--white, #fff);
+    }
+
+    ul#entries li * {
+        pointer-events: none;
+    }
+
+    ul#entries li > .main {
         display: flex;
         flex-wrap: nowrap;
         align-items: center;
         padding: 8px 20px;
-        background-color: var(--white, #fff);
         user-select: none;
         -webkit-user-select: none;
-    }
-
-    ul#entries li.data-entry:hover {
-        background-color: #e6e6e6;
-        cursor: pointer;
-    }
-
-    ul#entries li > span {
-        pointer-events: none;
     }
 
     ul#entries li .index {
@@ -207,8 +182,9 @@
     }
 
     ul#entries li .name {
-        width: calc(100% - 28px);
         display: inline-block;
+        width: calc(100% - 28px);
+        padding-right: 16px;
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
@@ -217,8 +193,62 @@
         letter-spacing: -0.02em;
     }
 
+    ul#entries li .arrow {
+        display: none;
+        position: absolute;
+        right: 15px;
+        padding: 3px 8px;
+        font-size: 8px;
+        text-align: center;
+        color: rgba(0,0,0,0.33);
+        transform: scaleY(-1);
+        -webkit-transform: scaleY(-1);
+        pointer-events: initial;
+        cursor: pointer;
+    }
+
+    ul#entries li .arrow.opened {
+        transform: scaleY(1);
+        -webkit-transform: scaleY(1);
+    }
+
     ul#entries li:nth-child(odd) {
         background-color: #f6f6f6;
+    }
+
+    ul#entries li [id^="more-information"] {
+        display: none;
+    }
+
+    ul#entries li:hover {
+        background-color: #e6e6e6;
+        cursor: pointer;
+    }
+
+    ul#entries li:hover .arrow {
+        display: inline-block;
+    }
+
+    ul#entries li dl {
+        display: -ms-grid;
+        display: grid;
+        grid-template-columns: 90px auto;
+        grid-column-gap: 10px;
+        grid-row-gap: 4px;
+        padding: 10px 0 14px;
+        margin: 0 20px;
+        color: rgba(0,0,0,0.75);
+        border-top: 1px dotted rgba(0,0,0,0.25);
+    }
+
+    ul#entries li dl dt {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    ul#entries li dl dd {
+        margin: 0;
     }
 
     /* Messages */
@@ -234,10 +264,6 @@
         margin: 5px 0;
         padding: 0 0 0 18px;
         color: var(--accent-color-light, rgba(0,0,0,0.75));
-    }
-
-    a {
-        color: var(--accent-color);
     }
 </style>
 
@@ -261,11 +287,9 @@
                     parent.postMessage({ pluginMessage: { type: 'load', data } }, '*');
 
                     // remove all entries from list
-                    document.getElementById('keys').innerHTML = '';
                     document.getElementById('entries').innerHTML = '';
 
                     // creates for each entry a direct link in list
-                    createKeys(data);
                     createEntries(data);
 
                     // initiate action
@@ -280,24 +304,51 @@
             });
     };
 
-    document.getElementById('fill').onclick = () => {
-        parent.postMessage({ pluginMessage: { type: 'fill' } }, '*')
-    };
-
-    document.getElementById('entries').addEventListener('click', function(e) {
-        if(e.target.matches('li.data-entry')) {
-            let index = e.target.attributes.index.textContent;
-            parent.postMessage({ pluginMessage: { type: 'fill-specific', index } }, '*')
-        }
-    });
-
     document.getElementById('close').onclick = () => {
         parent.postMessage({ pluginMessage: { type: 'close' } }, '*')
     };
 
+    document.getElementById('fill').onclick = () => {
+        parent.postMessage({ pluginMessage: { type: 'fill' } }, '*')
+    };
+
+    // get specific entry
+    document.getElementById('entries').addEventListener('click', function(e) {
+        if (e.target.matches('li.data-entry')) {
+
+            // get correct entry by comparing indexes
+            let index = e.target.attributes.index.textContent;
+
+            // fill in entry
+            parent.postMessage({ pluginMessage: { type: 'fill-specific', index } }, '*')
+        }
+    });
+
+    // open more information accordion of specific entry
+    document.getElementById('entries').addEventListener('click', function(e) {
+        if (e.target.matches('.arrow')) {
+            toggleMoreInformation(e.target, e.target.attributes.index.textContent);
+        }
+    });
+
     function createEntries(data) {
         let i = 0;
         for (let entry of data) {
+
+            // prepare dl
+            let dl = document.createElement('dl');
+
+            for (let value of Object.keys(entry)) {
+                let dt = document.createElement('dt');
+                let dd = document.createElement('dd');
+
+                dt.innerHTML = value + ':';
+                dt.title = value;
+                dl.appendChild(dt);
+
+                dd.innerHTML = entry[value];
+                dl.appendChild(dd);
+            }
 
             // prepare li
             let name;
@@ -308,7 +359,7 @@
             if (entry['Name']) {
                 name = entry['Name'];
             } else if (entry['name']) {
-                name = entry['Name'];
+                name = entry['name'];
             } else if (entry['Title']) {
                 name = entry['Title'];
             } else if (entry['title']) {
@@ -318,42 +369,28 @@
             }
 
             li.innerHTML =
-                '<span class="index">' + (i + 1) + '.</span>' +
-                '<span class="name">' + name + '</span>';
+                '<div class="main">' +
+                    '<span class="index">' + (i + 1) + '.</span>' +
+                    '<span class="name">' + name + '</span>' +
+                    '<span class="arrow" index="' + i + '">▲</span>' +
+                '</div>' +
+                '<div id="more-information-' + i + '"></div>';
 
             // append li
             document.getElementById('entries').appendChild(li);
+            document.getElementById('more-information-' + i).appendChild(dl);
             i++;
         }
     }
 
-    function createKeys(data) {
-        let i = 0;
-        let combinedKeys = [];
-        let keys = [];
-
-        for (let entry of data) {
-            keys = Object.keys(entry);
-
-            for (let e of keys) {
-                combinedKeys.push(e);
-            }
-        }
-
-        let uniqueKeys = [...new Set(combinedKeys)];
-
-        for (let key of uniqueKeys) {
-
-            // prepare li
-            let li = document.createElement('li');
-            li.classList.add('data-key');
-            li.setAttribute('index', i);
-
-            li.innerHTML = '<span class="key">[' + key + ']</span>';
-
-            // append li
-            document.getElementById('keys').appendChild(li);
-            i++;
+    function toggleMoreInformation(el, index) {
+        if (el.classList.contains('opened')) {
+            document.getElementById('more-information-' + index).style.display = 'none';
+            el.classList.remove('opened');
+        } else {
+            document.getElementById('more-information-' + index).style.display = 'block';
+            el.classList.add('opened');
         }
     }
+
 </script>

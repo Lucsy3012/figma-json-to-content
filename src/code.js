@@ -56,6 +56,7 @@ figma.ui.onmessage = msg => {
                     }
                 }
             }
+            // If selection contains more TextNodes
             else {
                 // Get keys of data
                 for (const key of keys) {
