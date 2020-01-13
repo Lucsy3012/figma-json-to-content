@@ -3,8 +3,11 @@
     <!-- Loading content -->
     <div class="container" id="main">
         <div class="loading-panel">
-            <input id="data" placeholder="https://path.com/to/data.json">
+            <input id="data" placeholder="https://path.com/to/data.json" />
             <button id="load">Load</button>
+
+            <!-- File upload -->
+            <input id="fileupload" type="file" accept="application/json">
         </div>
         <p class="introduction-text" id="intro">Overwrite multiple text layers with real and coherent, yet randomized data. Simply load your JSON to set up some content. Then select a group or a frame and click “Fill with data”. The generator will pick a random entry but keeps the set together.</p>
         <p class="msg error" id="error-msg"></p>
@@ -268,6 +271,30 @@
 </style>
 
 <script>
+
+    document.getElementById('fileupload').onchange = () => {
+        const element = document.getElementById('fileupload');
+        const files = element.files;
+
+        if (files.length <= 0) {
+            return false;
+        }
+
+        var fr = new FileReader();
+
+        fr.onload = function (e) {
+            try {
+                const data = JSON.parse(e.target.result);
+
+                acceptAndSendData(parent, data);
+            } catch(error) {
+                console.log(error);
+            }
+        };
+
+        fr.readAsText(files.item(0));
+    };
+
     // Direct interactions
     document.getElementById('load').onclick = () => {
         const element = document.getElementById('data');
@@ -283,20 +310,7 @@
                 if (data.success === false) {
                     document.getElementById('error-msg').innerHTML = 'You have no permission to fetch this data. Please provide an URL that\'s publicly available.';
                 } else {
-                    // post message to figma
-                    parent.postMessage({ pluginMessage: { type: 'load', data } }, '*');
-
-                    // remove all entries from list
-                    document.getElementById('entries').innerHTML = '';
-
-                    // creates for each entry a direct link in list
-                    createEntries(data);
-
-                    // initiate action
-                    document.getElementById('entries').style.display = 'block';
-                    document.getElementById('intro').style.display = 'none';
-                    document.getElementById('fill').disabled = false;
-                    document.getElementById('error-msg').innerHTML = '';
+                    acceptAndSendData(parent, data);
                 }
             })
             .catch(error => {
@@ -330,6 +344,24 @@
             toggleMoreInformation(e.target, e.target.attributes.index.textContent);
         }
     });
+
+    function acceptAndSendData(parent, data) {
+
+        // post message to figma
+        parent.postMessage({ pluginMessage: { type: 'load', data } }, '*');
+
+        // remove all entries from list
+        document.getElementById('entries').innerHTML = '';
+
+        // creates for each entry a direct link in list
+        createEntries(data);
+
+        // initiate action
+        document.getElementById('entries').style.display = 'block';
+        document.getElementById('intro').style.display = 'none';
+        document.getElementById('fill').disabled = false;
+        document.getElementById('error-msg').innerHTML = '';
+    }
 
     function createEntries(data) {
         let i = 0;
