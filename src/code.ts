@@ -43,7 +43,9 @@ figma.ui.onmessage = msg => {
   }
 
   function loadFontsFrom(layer) {
-    figma.loadFontAsync({ family: layer.fontName.family, style: layer.fontName.style });
+    return new Promise(resolve => {
+      resolve(figma.loadFontAsync({ family: layer.fontName.family, style: layer.fontName.style }));
+    });
   }
 
   function getData() {
@@ -58,7 +60,7 @@ figma.ui.onmessage = msg => {
     random = Math.floor(Math.random() * len);
   }
 
-  function selectData(index) {
+  async function selectData(index) {
 
     // Get selection
     for (const node of figma.currentPage.selection) {
@@ -66,7 +68,7 @@ figma.ui.onmessage = msg => {
       // If selection is single TextNode
       if (node.type === "TEXT") {
         for (const key of keys) {
-          loadFontsFrom(node);
+          await loadFontsFrom(node);
 
           if (node.name === key) {
             node.characters = data[index][key];
@@ -86,7 +88,7 @@ figma.ui.onmessage = msg => {
 
           // Rewrite layer text with value of each key
           for (const layer of textLayers) {
-            loadFontsFrom(layer);
+            await loadFontsFrom(layer);
             layer.characters = data[index][key];
           }
         }
