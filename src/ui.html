@@ -3,8 +3,14 @@
     <!-- Loading content -->
     <div class="container" id="main">
         <div class="loading-panel">
-            <input id="data" placeholder="https://path.com/to/data.json">
-            <button id="load">Load</button>
+
+            <!-- Fetch file from url -->
+            <input id="data" placeholder="https://path/to/data.json" />
+            <button id="load">From URL</button>
+
+            <!-- File upload -->
+            <input id="fileupload" name="fileupload" type="file" accept="application/json">
+            <label for="fileupload" id="fileupload-label" class="btn">Upload your local .json</label>
         </div>
         <p class="introduction-text" id="intro">Overwrite multiple text layers with real and coherent, yet randomized data. Simply load your JSON to set up some content. Then select a group or a frame and click “Fill with data”. The generator will pick a random entry but keeps the set together.</p>
         <p class="msg error" id="error-msg"></p>
@@ -76,7 +82,7 @@
     ul:empty {
         display: none;
     }
-    input, button {
+    input, button, .btn {
         -webkit-appearance: none;
         -moz-appearance: none;
         appearance: none;
@@ -98,7 +104,7 @@
     }
 
     /* Regular Button */
-    button {
+    button, .btn {
         display: inline-block;
         padding: 4px 11px;
         font-size: 11px;
@@ -110,12 +116,12 @@
         cursor: pointer;
         letter-spacing: normal;
     }
-    button:hover {
+    button:hover, .btn:hover {
         color: var(--button-color-text, #fff);
         background-color: var(--accent-color-hover, #000);
         border-color: var(--accent-color-hover, #000);
     }
-    button:disabled {
+    button:disabled, .btn:disabled {
         color: rgba(97, 97, 97, 0.51);
         background-color: #dbdbdb;
         border-color: #dbdbdb;
@@ -265,9 +271,51 @@
         padding: 0 0 0 18px;
         color: var(--accent-color-light, rgba(0,0,0,0.75));
     }
+
+    #fileupload {
+        display: none;
+        visibility: hidden;
+    }
+
+    label[for="fileupload"] {
+        margin-top: 10px;
+        width: 100%;
+        text-align: center;
+    }
 </style>
 
 <script>
+    const errorMsg = document.getElementById('error-msg');
+
+    document.getElementById('fileupload').onchange = () => {
+        const element = document.getElementById('fileupload');
+        const label = document.getElementById('fileupload-label');
+        const files = element.files;
+
+        if (files.length <= 0) {
+            return false;
+        }
+
+        var fr = new FileReader();
+
+        fr.onload = function (e) {
+            try {
+                const data = JSON.parse(e.target.result);
+
+                acceptAndSendData(parent, data);
+
+                // Rename button
+                label.textContent = files[0].name;
+            } catch(error) {
+                if (error instanceof SyntaxError) {
+                    errorMsg.innerHTML = 'The file could not be loaded. The file seems to have syntax errors.';
+                }
+            }
+        };
+
+        fr.readAsText(files.item(0));
+    };
+
     // Direct interactions
     document.getElementById('load').onclick = () => {
         const element = document.getElementById('data');
@@ -281,26 +329,13 @@
 
                 // if no access
                 if (data.success === false) {
-                    document.getElementById('error-msg').innerHTML = 'You have no permission to fetch this data. Please provide an URL that\'s publicly available.';
+                    errorMsg.innerHTML = 'You have no permission to fetch this data. Please provide an URL that\'s publicly available.';
                 } else {
-                    // post message to figma
-                    parent.postMessage({ pluginMessage: { type: 'load', data } }, '*');
-
-                    // remove all entries from list
-                    document.getElementById('entries').innerHTML = '';
-
-                    // creates for each entry a direct link in list
-                    createEntries(data);
-
-                    // initiate action
-                    document.getElementById('entries').style.display = 'block';
-                    document.getElementById('intro').style.display = 'none';
-                    document.getElementById('fill').disabled = false;
-                    document.getElementById('error-msg').innerHTML = '';
+                    acceptAndSendData(parent, data);
                 }
             })
             .catch(error => {
-                document.getElementById('error-msg').innerHTML = 'The file could not be loaded. Please check the following steps:<ul><li>Check if the URL is correct and complete.</li><li>Check if the URL is publicly available (local files will not work).</li><li>Check if the URL provides a valid JSON file (see <a href="https://raw.githubusercontent.com/Lucsy3012/figma-json-to-content/master/example/breaking-bad-season-one.json" target="_blank" rel="nofollow">example</a>).</li></ul>';
+                errorMsg.innerHTML = 'The file could not be loaded. Please check the following steps:<ul><li>Check if the URL is correct and complete.</li><li>Check if the URL is publicly available (local files will not work).</li><li>Check if the URL provides a valid JSON file (see <a href="https://raw.githubusercontent.com/Lucsy3012/figma-json-to-content/master/example/breaking-bad-season-one.json" target="_blank" rel="nofollow">example</a>).</li></ul>';
             });
     };
 
@@ -331,55 +366,95 @@
         }
     });
 
-    function createEntries(data) {
+    function acceptAndSendData(parent, data) {
+
+        // post data to ui
+        parent.postMessage({ pluginMessage: { type: 'load', data } }, '*');
+
+        // remove all entries from list
+        document.getElementById('entries').innerHTML = '';
+
+        // creates for each entry a direct link in list
+        createEntries(parent, data);
+
+        // initiate action
+        document.getElementById('entries').style.display = 'block';
+        document.getElementById('intro').style.display = 'none';
+        document.getElementById('fill').disabled = false;
+        errorMsg.innerHTML = '';
+
+        // post message to figma
+        parent.postMessage({ pluginMessage: { type: 'success', data } }, '*');
+    }
+
+    function createEntries(parent, data) {
         let i = 0;
+        let errorCount = 0;
+
+        // WARNING : if not an array, create an array
+        if (data.length === undefined) {
+            data = [data];
+        }
+
+        // iterate over data/json entries
         for (let entry of data) {
 
-            // prepare dl
-            let dl = document.createElement('dl');
-
-            for (let value of Object.keys(entry)) {
-                let dt = document.createElement('dt');
-                let dd = document.createElement('dd');
-
-                dt.innerHTML = value + ':';
-                dt.title = value;
-                dl.appendChild(dt);
-
-                dd.innerHTML = entry[value];
-                dl.appendChild(dd);
+            // WARNING : if an object is empty
+            let _errorEmpty = Object.keys(entry).length === 0;
+            if (_errorEmpty && errorCount <= 0) {
+                parent.postMessage({ pluginMessage: { type: 'warning', data: 'emptyObject' } }, '*');
+                errorCount++;
             }
 
-            // prepare li
-            let name;
-            let li = document.createElement('li');
-            li.classList.add('data-entry');
-            li.setAttribute('index', i);
+            if (!_errorEmpty) {
 
-            if (entry['Name']) {
-                name = entry['Name'];
-            } else if (entry['name']) {
-                name = entry['name'];
-            } else if (entry['Title']) {
-                name = entry['Title'];
-            } else if (entry['title']) {
-                name = entry['title'];
-            } else {
-                name = Object.values(entry)[0];
-            }
+                // prepare dl
+                let dl = document.createElement('dl');
 
-            li.innerHTML =
-                '<div class="main">' +
+                for (let value of Object.keys(entry)) {
+                    let dt = document.createElement('dt');
+                    let dd = document.createElement('dd');
+
+                    dt.innerHTML = value + ':';
+                    dt.title = value;
+                    dl.appendChild(dt);
+
+                    dd.innerHTML = entry[value];
+                    dl.appendChild(dd);
+                }
+
+                // prepare li
+                let name;
+                let li = document.createElement('li');
+                li.classList.add('data-entry');
+                li.setAttribute('index', i);
+
+                if (entry['Name']) {
+                    name = entry['Name'];
+                } else if (entry['name']) {
+                    name = entry['name'];
+                } else if (entry['Title']) {
+                    name = entry['Title'];
+                } else if (entry['title']) {
+                    name = entry['title'];
+                } else {
+                    name = Object.values(entry)[0];
+                }
+
+                // create li
+                li.innerHTML =
+                    '<div class="main">' +
                     '<span class="index">' + (i + 1) + '.</span>' +
-                    '<span class="name">' + name + '</span>' +
-                    '<span class="arrow" index="' + i + '">▲</span>' +
-                '</div>' +
-                '<div id="more-information-' + i + '"></div>';
+                        '<span class="name">' + name + '</span>' +
+                        '<span class="arrow" index="' + i + '">▲</span>' +
+                    '</div>' +
+                    '<div id="more-information-' + i + '"></div>';
 
-            // append li
-            document.getElementById('entries').appendChild(li);
-            document.getElementById('more-information-' + i).appendChild(dl);
-            i++;
+                // append li
+                document.getElementById('entries').appendChild(li);
+                document.getElementById('more-information-' + i).appendChild(dl);
+                i++;
+            }
         }
     }
 

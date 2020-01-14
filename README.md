@@ -17,4 +17,4 @@ When you have imported your data the plugin will print a list with every entry t
 
 #### Future plans:
 * Implement the ability to also link images
-* Upload local JSON files
+* Upload .csv files
