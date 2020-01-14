@@ -354,7 +354,7 @@
         document.getElementById('entries').innerHTML = '';
 
         // creates for each entry a direct link in list
-        createEntries(data);
+        createEntries(parent, data);
 
         // initiate action
         document.getElementById('entries').style.display = 'block';
@@ -363,55 +363,67 @@
         document.getElementById('error-msg').innerHTML = '';
     }
 
-    function createEntries(data) {
+    function createEntries(parent, data) {
         let i = 0;
+        let errorCount = 0;
+
         for (let entry of data) {
 
+            let _errorEmpty = Object.keys(entry).length === 0;
+
+            // ERROR : if object is empty
+            if (_errorEmpty && errorCount <= 0) {
+                parent.postMessage({ pluginMessage: { type: 'error', data: 'emptyObject' } }, '*');
+                errorCount++;
+            }
+
             // prepare dl
-            let dl = document.createElement('dl');
+            if (!_errorEmpty) {
+                let dl = document.createElement('dl');
 
-            for (let value of Object.keys(entry)) {
-                let dt = document.createElement('dt');
-                let dd = document.createElement('dd');
+                for (let value of Object.keys(entry)) {
+                    let dt = document.createElement('dt');
+                    let dd = document.createElement('dd');
 
-                dt.innerHTML = value + ':';
-                dt.title = value;
-                dl.appendChild(dt);
+                    dt.innerHTML = value + ':';
+                    dt.title = value;
+                    dl.appendChild(dt);
 
-                dd.innerHTML = entry[value];
-                dl.appendChild(dd);
-            }
+                    dd.innerHTML = entry[value];
+                    dl.appendChild(dd);
+                }
 
-            // prepare li
-            let name;
-            let li = document.createElement('li');
-            li.classList.add('data-entry');
-            li.setAttribute('index', i);
+                // prepare li
+                let name;
+                let li = document.createElement('li');
+                li.classList.add('data-entry');
+                li.setAttribute('index', i);
 
-            if (entry['Name']) {
-                name = entry['Name'];
-            } else if (entry['name']) {
-                name = entry['name'];
-            } else if (entry['Title']) {
-                name = entry['Title'];
-            } else if (entry['title']) {
-                name = entry['title'];
-            } else {
-                name = Object.values(entry)[0];
-            }
+                if (entry['Name']) {
+                    name = entry['Name'];
+                } else if (entry['name']) {
+                    name = entry['name'];
+                } else if (entry['Title']) {
+                    name = entry['Title'];
+                } else if (entry['title']) {
+                    name = entry['title'];
+                } else {
+                    name = Object.values(entry)[0];
+                }
 
-            li.innerHTML =
-                '<div class="main">' +
+                li.innerHTML =
+                    '<div class="main">' +
                     '<span class="index">' + (i + 1) + '.</span>' +
-                    '<span class="name">' + name + '</span>' +
-                    '<span class="arrow" index="' + i + '">▲</span>' +
-                '</div>' +
-                '<div id="more-information-' + i + '"></div>';
+                        '<span class="name">' + name + '</span>' +
+                        '<span class="arrow" index="' + i + '">▲</span>' +
+                    '</div>' +
+                    '<div id="more-information-' + i + '"></div>';
 
-            // append li
-            document.getElementById('entries').appendChild(li);
-            document.getElementById('more-information-' + i).appendChild(dl);
-            i++;
+                // append li
+                document.getElementById('entries').appendChild(li);
+                document.getElementById('more-information-' + i).appendChild(dl);
+                i++;
+            }
         }
     }
 

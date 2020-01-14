@@ -32,6 +32,13 @@ figma.ui.onmessage = msg => {
     if (msg.type === 'close') {
         figma.closePlugin();
     }
+    // Error
+    if (msg.type === 'error') {
+        // Empty object notification
+        if (msg.data === 'emptyObject') {
+            figma.notify('I have discovered some empty objects and skipped those.');
+        }
+    }
     function loadFontsFrom(layer) {
         figma.loadFontAsync({ family: layer.fontName.family, style: layer.fontName.style });
     }
@@ -56,7 +63,6 @@ figma.ui.onmessage = msg => {
                     }
                 }
             }
-            // If selection contains more TextNodes
             else {
                 // Get keys of data
                 for (const key of keys) {

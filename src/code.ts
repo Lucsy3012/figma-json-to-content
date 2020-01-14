@@ -42,6 +42,15 @@ figma.ui.onmessage = msg => {
     figma.closePlugin();
   }
 
+  // Error
+  if (msg.type === 'error') {
+
+    // Empty object notification
+    if (msg.data === 'emptyObject') {
+      figma.notify('I have discovered some empty objects and skipped those.');
+    }
+  }
+
   function loadFontsFrom(layer) {
     figma.loadFontAsync({ family: layer.fontName.family, style: layer.fontName.style });
   }
