@@ -10,13 +10,16 @@ figma.ui.onmessage = msg => {
         data = [];
         data = msg.data;
         if (msg.data !== []) {
-            figma.notify('JSON has been loaded successfully');
             // Load every text style in use once
             const textNodes = figma.root.findAll(node => node.type === "TEXT");
             for (const textNode of textNodes) {
                 loadFontsFrom(textNode);
             }
         }
+    }
+    // Success
+    if (msg.type === 'success') {
+        figma.notify('Data has been loaded successfully. Have fun!');
     }
     // Fill in random entry
     if (msg.type === 'fill') {
@@ -33,11 +36,9 @@ figma.ui.onmessage = msg => {
         figma.closePlugin();
     }
     // Error
-    if (msg.type === 'error') {
+    if (msg.type === 'warning') {
         // Empty object notification
-        if (msg.data === 'emptyObject') {
-            figma.notify('I have discovered some empty objects and skipped those.');
-        }
+        notifyWarning('emptyObject', 'I have discovered some empty objects and skipped those.');
     }
     function loadFontsFrom(layer) {
         figma.loadFontAsync({ family: layer.fontName.family, style: layer.fontName.style });
@@ -63,6 +64,7 @@ figma.ui.onmessage = msg => {
                     }
                 }
             }
+            // If selection contains more TextNodes
             else {
                 // Get keys of data
                 for (const key of keys) {
@@ -76,6 +78,11 @@ figma.ui.onmessage = msg => {
                     }
                 }
             }
+        }
+    }
+    function notifyWarning(data, text) {
+        if (msg.data === data) {
+            figma.notify(text);
         }
     }
 };

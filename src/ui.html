@@ -285,6 +285,7 @@
         fr.onload = function (e) {
             try {
                 const data = JSON.parse(e.target.result);
+                console.log('test: ', data);
 
                 acceptAndSendData(parent, data);
             } catch(error) {
@@ -347,7 +348,7 @@
 
     function acceptAndSendData(parent, data) {
 
-        // post message to figma
+        // post data to ui
         parent.postMessage({ pluginMessage: { type: 'load', data } }, '*');
 
         // remove all entries from list
@@ -361,24 +362,33 @@
         document.getElementById('intro').style.display = 'none';
         document.getElementById('fill').disabled = false;
         document.getElementById('error-msg').innerHTML = '';
+
+        // post message to figma
+        parent.postMessage({ pluginMessage: { type: 'success', data } }, '*');
     }
 
     function createEntries(parent, data) {
         let i = 0;
         let errorCount = 0;
 
+        // WARNING : if not an array, create an array
+        if (data.length === undefined) {
+            data = [data];
+        }
+
+        // iterate over data/json entries
         for (let entry of data) {
 
+            // WARNING : if an object is empty
             let _errorEmpty = Object.keys(entry).length === 0;
-
-            // ERROR : if object is empty
             if (_errorEmpty && errorCount <= 0) {
-                parent.postMessage({ pluginMessage: { type: 'error', data: 'emptyObject' } }, '*');
+                parent.postMessage({ pluginMessage: { type: 'warning', data: 'emptyObject' } }, '*');
                 errorCount++;
             }
 
-            // prepare dl
             if (!_errorEmpty) {
+
+                // prepare dl
                 let dl = document.createElement('dl');
 
                 for (let value of Object.keys(entry)) {
@@ -411,6 +421,7 @@
                     name = Object.values(entry)[0];
                 }
 
+                // create li
                 li.innerHTML =
                     '<div class="main">' +
                     '<span class="index">' + (i + 1) + '.</span>' +
