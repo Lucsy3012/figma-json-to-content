@@ -82,7 +82,7 @@ figma.ui.onmessage = msg => {
           await loadFontsFrom(node);
 
           if (node.name === key) {
-            node.characters = data[index][key];
+            node.characters = data[index][key].toString();
           }
         }
       }
@@ -100,7 +100,7 @@ figma.ui.onmessage = msg => {
           // Rewrite layer text with value of each key
           for (const layer of textLayers) {
             await loadFontsFrom(layer);
-            layer.characters = data[index][key];
+            layer.characters = data[index][key].toString();
           }
         }
       }
