@@ -9,7 +9,7 @@
             <button id="load">From URL</button>
 
             <!-- File upload -->
-            <input id="fileupload" name="fileupload" type="file" accept="application/json">
+            <input id="fileupload" name="fileupload" type="file" accept="application/json,.csv">
             <label for="fileupload" id="fileupload-label" class="btn">Upload your local .json</label>
         </div>
         <p class="introduction-text" id="intro">Overwrite multiple text layers with real and coherent, yet randomized data. Simply load your JSON to set up some content. Then select a group or a frame and click “Fill with data”. The generator will pick a random entry but keeps the set together.</p>
@@ -298,20 +298,44 @@
 
         var fr = new FileReader();
 
-        fr.onload = function (e) {
-            try {
-                const data = JSON.parse(e.target.result);
+        console.log(files[0]);
 
-                acceptAndSendData(parent, data);
+        // If file is .csv
+        if (files[0].name.match('.csv')) {
 
-                // Rename button
-                label.textContent = files[0].name;
-            } catch(error) {
-                if (error instanceof SyntaxError) {
-                    errorMsg.innerHTML = 'The file could not be loaded. The file seems to have syntax errors.';
+            fr.onload = function (e) {
+                try {
+                    const data = readCSV(e);
+
+                    acceptAndSendData(parent, data);
+
+                    // Rename button
+                    label.textContent = files[0].name;
+                } catch(error) {
+                    if (error instanceof SyntaxError) {
+                        errorMsg.innerHTML = 'The file could not be loaded. The file seems to have syntax errors.';
+                    }
                 }
             }
-        };
+        }
+
+        // If file is .json
+        if (files[0].name.match('.json')) {
+            fr.onload = function (e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+
+                    acceptAndSendData(parent, data);
+
+                    // Rename button
+                    label.textContent = files[0].name;
+                } catch(error) {
+                    if (error instanceof SyntaxError) {
+                        errorMsg.innerHTML = 'The file could not be loaded. The file seems to have syntax errors.';
+                    }
+                }
+            };
+        }
 
         fr.readAsText(files.item(0));
     };
@@ -466,6 +490,34 @@
             document.getElementById('more-information-' + index).style.display = 'block';
             el.classList.add('opened');
         }
+    }
+
+    function readCSV(e, separator = ',') {
+        const lines = e.target.result.split('\n').map(function(e) {
+            return e.split(separator)
+        });
+
+        let data = [];
+        let keys = lines[0];
+
+        for (var i = 1; i <= (lines.length - 1); i++) {
+
+            var obj = {};
+
+            for (var a = 0; a <= lines[i].length; a++) {
+                const key = keys[a];
+                const value = lines[i][a];
+
+                if (key !== undefined && value !== undefined) {
+                    obj[key] = value;
+                }
+
+            }
+
+            data.push(obj);
+        }
+
+        return data;
     }
 
 </script>
