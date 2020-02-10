@@ -1,19 +1,40 @@
 <body>
 
     <!-- Loading content -->
-    <div class="container" id="main">
-        <div class="loading-panel">
-
-            <!-- Fetch file from url -->
-            <input id="data" placeholder="https://path/to/data.json" />
-            <button id="load">From URL</button>
-
-            <!-- File upload -->
-            <input id="fileupload" name="fileupload" type="file" accept="application/json,.csv">
-            <label for="fileupload" id="fileupload-label" class="btn">Upload your local .json</label>
+    <div class="json--active" id="main">
+        <div class="file-selection-panel">
+            <strong>Choose your file settings:</strong>
+            <input type="radio" name="file-type" id="json" checked />
+            <label for="json" id="file-json">JSON</label>
+            <input type="radio" name="file-type" id="csv" />
+            <label for="csv" id="file-csv">CSV</label>
         </div>
-        <p class="introduction-text" id="intro">Overwrite multiple text layers with real and coherent, yet randomized data. Simply load your JSON to set up some content. Then select a group or a frame and click “Fill with data”. The generator will pick a random entry but keeps the set together.</p>
-        <p class="msg error" id="error-msg"></p>
+        <div class="container">
+            <div class="loading-panel">
+
+                <!-- Input: Fetch file from url (JSON only) -->
+                <label class="inactive-csv" for="data">URL:</label>
+                <input class="inactive-csv" id="data" name="data" placeholder="https://path/to/data.json" />
+
+                <!-- Input: Separator (CSV only)  -->
+                <label class="inactive-json" for="separator">Separator¹:</label>
+                <input class="inactive-json" id="separator" name="separator" placeholder="Type separator" />
+
+                <!-- File upload -->
+                <input id="fileupload" name="fileupload" type="file" accept="application/json,.csv" />
+
+                <!-- Break -->
+                <div class="break-100"></div>
+
+                <!-- Buttons -->
+                <button class="inactive-csv" id="load">From URL</button>
+                <div class="inactive-csv break"></div>
+                <label for="fileupload" id="fileupload-label" class="btn">Upload file</label>
+            </div>
+            <p class="introduction-text inactive-csv" id="intro-json">Overwrite multiple text layers with real and coherent, yet randomized data. Simply load your JSON to set up some content. Then select a group or a frame and click “Fill with random entry”. The generator will pick a random entry but keeps the set together.</p>
+            <p class="introduction-text inactive-json" id="intro-csv">¹ Most .csv files are separated by , or by ;</p>
+            <p class="msg error" id="error-msg"></p>
+        </div>
     </div>
 
     <!-- All entries -->
@@ -35,6 +56,7 @@
 
         --white: #fff;
         --light-gray: #f1f1f1;
+        --middle-gray: #eeeeee;
         --border-gray: #cdcdcd;
         --black: #000;
     }
@@ -82,25 +104,18 @@
     ul:empty {
         display: none;
     }
-    input, button, .btn {
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-        transition: all .2s var(--easing, cubic-bezier(0.65, 0.29, 0.41, 1.07));
-    }
-
-    input {
-        outline: none;
-        box-shadow: none;
-        font-size: 12px;
-        font-weight: 500;
-        border: 0;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-        margin-right: 20px;
-        padding: 4px 0;
-    }
     a {
         color: var(--accent-color);
+    }
+
+    .break {
+        width: 10px;
+        height: 10px;
+    }
+
+    .break-100 {
+        width: 100%;
+        height: 10px;
     }
 
     /* Regular Button */
@@ -133,11 +148,10 @@
         display: flex;
         flex-wrap: wrap;
     }
-    .loading-panel input {
+    .loading-panel input,
+    .loading-panel button,
+    .loading-panel .btn {
         flex: auto;
-    }
-    .loading-panel button#load {
-        margin-left: auto;
     }
 
     /* Action Panel */
@@ -154,6 +168,41 @@
     }
     .action-panel button#close {
         margin-left: auto;
+    }
+
+    /* File Selection Panel */
+    .file-selection-panel {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        padding: 6px 20px;
+        background-color: #f5f5f5;
+        border-bottom: 1px solid var(--border-gray);
+    }
+
+    .file-selection-panel > * {
+        flex: auto;
+    }
+
+    .file-selection-panel input {
+        margin-left: auto;
+    }
+
+    .file-selection-panel strong {
+        flex-grow: 5;
+    }
+
+    .file-selection-panel label {
+        text-align: right;
+        cursor: pointer;
+        user-select: none;
+        opacity: .5;
+        transition: all .2s var(--easing, cubic-bezier(0.65, 0.29, 0.41, 1.07));
+    }
+
+    .file-selection-panel input[type="radio"]:checked + label {
+        opacity: 1;
+        font-weight: 600;
     }
 
     /* Entries List */
@@ -272,15 +321,47 @@
         color: var(--accent-color-light, rgba(0,0,0,0.75));
     }
 
-    #fileupload {
+    /* Form */
+    input, button, .btn {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        line-height: normal;
+        transition: all .2s var(--easing, cubic-bezier(0.65, 0.29, 0.41, 1.07));
+    }
+
+    input {
+        outline: none;
+        box-shadow: none;
+        padding: 5px 11px;
+        font-size: 11px;
+        font-weight: 500;
+        border: 0;
+        border-radius: 4px;
+        margin-left: 16px;
+        background-color: var(--middle-gray, #eeeeee);
+    }
+
+    #fileupload, input[type="radio"] {
         display: none;
         visibility: hidden;
     }
 
     label[for="fileupload"] {
-        margin-top: 10px;
-        width: 100%;
+        line-height: normal;
         text-align: center;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    .json--active .inactive-json,
+    .csv--active .inactive-csv {
+        display: none !important;
+    }
+
+    .json--active .break + label[for="fileupload"] {
+        max-width: calc(50% - 5px);
     }
 </style>
 
@@ -298,14 +379,14 @@
 
         var fr = new FileReader();
 
-        console.log(files[0]);
-
         // If file is .csv
         if (files[0].name.match('.csv')) {
 
             fr.onload = function (e) {
                 try {
-                    const data = readCSV(e);
+
+                    // Read CSV, check for separator type
+                    const data = readCSV(e, returnValueFromID('separator', ','));
 
                     acceptAndSendData(parent, data);
 
@@ -390,6 +471,32 @@
         }
     });
 
+    // switch file selection
+    const main      = document.getElementById('main');
+    const fileJSON  = document.getElementById('file-json');
+    const fileCSV   = document.getElementById('file-csv');
+    const fileLabel = document.getElementById('fileupload-label');
+    const file      = document.getElementById('fileupload');
+
+    fileJSON.addEventListener('click', function() {
+        main.classList.add('json--active');
+        main.classList.remove('csv--active');
+        file.value = null;
+        fileLabel.textContent = 'Upload file';
+    });
+
+    fileCSV.addEventListener('click', function() {
+        main.classList.add('csv--active');
+        main.classList.remove('json--active');
+        file.value = null;
+        fileLabel.textContent = 'Upload file';
+    });
+
+    /*
+     * Functions
+     * -----------------------
+     */
+
     function acceptAndSendData(parent, data) {
 
         // post data to ui
@@ -403,7 +510,8 @@
 
         // initiate action
         document.getElementById('entries').style.display = 'block';
-        document.getElementById('intro').style.display = 'none';
+        document.getElementById('intro-json').style.display = 'none';
+        document.getElementById('intro-csv').style.display = 'none';
         document.getElementById('fill').disabled = false;
         errorMsg.innerHTML = '';
 
@@ -470,7 +578,7 @@
                     '<div class="main">' +
                     '<span class="index">' + (i + 1) + '.</span>' +
                         '<span class="name">' + name + '</span>' +
-                        '<span class="arrow" index="' + i + '">▲</span>' +
+                        '<span class="arrow" index="' + i + '"><svg width="11" height="12" viewBox="0 0 11 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path opacity="0.2" d="M9.8995 6.24264L5.65686 2L1.41422 6.24265" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
                     '</div>' +
                     '<div id="more-information-' + i + '"></div>';
 
@@ -490,6 +598,11 @@
             document.getElementById('more-information-' + index).style.display = 'block';
             el.classList.add('opened');
         }
+    }
+
+    function returnValueFromID(id, fallback = ',') {
+        const input = document.getElementById(id);
+        return (input.value !== '') ? input.value : fallback;
     }
 
     function readCSV(e, separator = ',') {

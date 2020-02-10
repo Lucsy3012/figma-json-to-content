@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 // This shows the HTML page in "ui.html".
-figma.showUI(__html__, { height: 400 });
+figma.showUI(__html__, { height: 428 });
 // Create empty data
 let data = [];
 let keys;
