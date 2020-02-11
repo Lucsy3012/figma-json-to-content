@@ -18,7 +18,8 @@
 
                 <!-- Input: Separator (CSV only)  -->
                 <label class="inactive-json" for="separator">Separator¹:</label>
-                <input class="inactive-json" id="separator" name="separator" placeholder="Type separator" />
+                <input class="inactive-json" id="separator" name="separator" placeholder="," value="," maxlength="1" />
+                <input class="inactive-json" id="ignore" name="ignore" placeholder="But ignore between ..." maxlength="1" />
 
                 <!-- File upload -->
                 <input id="fileupload" name="fileupload" type="file" accept="application/json,.csv" />
@@ -32,7 +33,7 @@
                 <label for="fileupload" id="fileupload-label" class="btn">Upload file</label>
             </div>
             <p class="introduction-text inactive-csv" id="intro-json">Overwrite multiple text layers with real and coherent, yet randomized data. Simply load your JSON to set up some content. Then select a group or a frame and click “Fill with random entry”. The generator will pick a random entry but keeps the set together.</p>
-            <p class="introduction-text inactive-json" id="intro-csv">¹ Most .csv files are separated by , or by ;</p>
+            <p class="introduction-text inactive-json" id="intro-csv">¹ Most .csv files are separated by <b>,</b> or by <b>;</b><br/>The default value is <b>,</b><br/><br/>Optionally you can pass a character that indicates when the character you've set to be your separator should be printed, for example when it's surrounded by <b>"</b>. So a number like 1,000 can be printed within a comma-separated .csv if you write "1,000" instead.<br/>The default value is <b>"</b></p>
             <p class="msg error" id="error-msg"></p>
         </div>
     </div>
@@ -100,6 +101,10 @@
     p {
         color: rgba(0,0,0,0.5);
     }
+    p b, p strong {
+        color: #000;
+        font-weight: 600;
+    }
     p:empty,
     ul:empty {
         display: none;
@@ -152,6 +157,17 @@
     .loading-panel button,
     .loading-panel .btn {
         flex: auto;
+    }
+
+    .loading-panel input#separator {
+        max-width: 27px;
+        margin-left: auto;
+    }
+
+    .loading-panel input#ignore {
+        flex: initial;
+        max-width: 57%;
+        margin-left: 5px;
     }
 
     /* Action Panel */
@@ -405,7 +421,7 @@
                 try {
 
                     // Read CSV, check for separator type
-                    const data = readCSV(e, returnValueFromID('separator', ','));
+                    const data = readCSV(e, returnValueFromID('separator', ','), returnValueFromID('ignore', '"'));
 
                     acceptAndSendData(parent, data);
 
@@ -630,9 +646,11 @@
         return (input.value !== '') ? input.value : fallback;
     }
 
-    function readCSV(e, separator = ',') {
-        const lines = e.target.result.split('\n').map(function(e) {
-            return e.split(separator)
+    function readCSV(e, separator = ',', ignore = '"') {
+        var reg = new RegExp('((?:[^' + separator + '' + ignore + ']+|' + ignore + '[^' + ignore + ']*' + ignore + ')+)', 'g');
+
+        const lines = e.target.result.split(/\r\n|\n/).map(function(e) {
+            return e.match(reg)
         });
 
         let data = [];
@@ -654,6 +672,8 @@
 
             data.push(obj);
         }
+
+        console.log(data);
 
         return data;
     }
