@@ -38,7 +38,7 @@
     </div>
 
     <!-- All entries -->
-    <ul id="entries"></ul>
+    <ul id="entries" class="primary"></ul>
 
     <!-- Footer -->
     <div class="container-s action-panel">
@@ -57,7 +57,7 @@
         --white: #fff;
         --light-gray: #f1f1f1;
         --middle-gray: #eeeeee;
-        --border-gray: #cdcdcd;
+        --border-gray: #e5e5e5;
         --black: #000;
     }
     .primary {
@@ -197,7 +197,7 @@
         cursor: pointer;
         user-select: none;
         opacity: .5;
-        transition: all .2s var(--easing, cubic-bezier(0.65, 0.29, 0.41, 1.07));
+        transition: all .1s var(--easing, cubic-bezier(0.65, 0.29, 0.41, 1.07));
     }
 
     .file-selection-panel input[type="radio"]:checked + label {
@@ -208,12 +208,14 @@
     /* Entries List */
     ul#entries {
         margin: 0;
-        padding: 0;
+        padding: 0 20px;
         display: none;
     }
 
     ul#entries li {
         display: block;
+        margin: 4px 0;
+        border-radius: 4px;
         background-color: var(--white, #fff);
     }
 
@@ -225,14 +227,15 @@
         display: flex;
         flex-wrap: nowrap;
         align-items: center;
-        padding: 8px 20px;
+        position: relative;
+        padding: 5px 14px;
         user-select: none;
         -webkit-user-select: none;
     }
 
     ul#entries li .index {
         display: inline-block;
-        width: 28px;
+        width: 22px;
         color: rgba(0,0,0,0.5);
     }
 
@@ -244,16 +247,17 @@
         text-overflow: ellipsis;
         overflow: hidden;
         font-size: 13px;
-        font-weight: 600;
+        font-weight: 500;
         letter-spacing: -0.02em;
+        color: rgba(0,0,0,0.5);
     }
 
     ul#entries li .arrow {
         display: none;
         position: absolute;
-        right: 15px;
+        right: 8px;
         padding: 3px 8px;
-        font-size: 8px;
+        font-size: 18px;
         text-align: center;
         color: rgba(0,0,0,0.33);
         transform: scaleY(-1);
@@ -262,26 +266,41 @@
         cursor: pointer;
     }
 
-    ul#entries li .arrow.opened {
-        transform: scaleY(1);
-        -webkit-transform: scaleY(1);
+    ul#entries li.opened .arrow {
+        transform: scaleY(1) translateY(2px);
+        -webkit-transform: scaleY(1) translateY(2px);
     }
 
-    ul#entries li:nth-child(odd) {
-        background-color: #f6f6f6;
+    /* Entries Hover */
+    ul#entries li.opened .main {
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        background-color: var(--accent-color-fade, #e6e6e6);
     }
 
-    ul#entries li [id^="more-information"] {
-        display: none;
-    }
-
-    ul#entries li:hover {
-        background-color: #e6e6e6;
+    ul#entries li:hover,
+    ul#entries li.opened {
+        background-color: var(--accent-color-fade, #e6e6e6);
         cursor: pointer;
     }
 
+    ul#entries li:hover .index,
+    ul#entries li.opened .index {
+        color: var(--accent-color-light, rgba(0,0,0,0.75));
+    }
+
+    ul#entries li:hover .name,
+    ul#entries li.opened .name {
+        color: var(--accent-color, #000);
+    }
+
     ul#entries li:hover .arrow {
-        display: inline-block;
+        display: block;
+    }
+
+    /* Entries More Information */
+    ul#entries li [id^="more-information"] {
+        display: none;
     }
 
     ul#entries li dl {
@@ -290,10 +309,10 @@
         grid-template-columns: 90px auto;
         grid-column-gap: 10px;
         grid-row-gap: 4px;
-        padding: 10px 0 14px;
-        margin: 0 20px;
-        color: rgba(0,0,0,0.75);
-        border-top: 1px dotted rgba(0,0,0,0.25);
+        padding: 7px 16px 14px;
+        margin: 0;
+        color: var(--accent-color-light, rgba(0,0,0,0.75));
+        border-top: 1px solid var(--accent-color-fade, rgba(0,0,0,0.25));
     }
 
     ul#entries li dl dt {
@@ -327,7 +346,7 @@
         -moz-appearance: none;
         appearance: none;
         line-height: normal;
-        transition: all .2s var(--easing, cubic-bezier(0.65, 0.29, 0.41, 1.07));
+        transition: all .1s var(--easing, cubic-bezier(0.65, 0.29, 0.41, 1.07));
     }
 
     input {
@@ -569,6 +588,10 @@
                     name = entry['Title'];
                 } else if (entry['title']) {
                     name = entry['title'];
+                } else if (entry['Headline']) {
+                    name = entry['Headline'];
+                } else if (entry['headline']) {
+                    name = entry['headline'];
                 } else {
                     name = Object.values(entry)[0];
                 }
@@ -578,7 +601,7 @@
                     '<div class="main">' +
                     '<span class="index">' + (i + 1) + '.</span>' +
                         '<span class="name">' + name + '</span>' +
-                        '<span class="arrow" index="' + i + '"><svg width="11" height="12" viewBox="0 0 11 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path opacity="0.2" d="M9.8995 6.24264L5.65686 2L1.41422 6.24265" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
+                        '<span class="arrow" index="' + i + '"><svg width="11" height="12" viewBox="0 0 11 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path opacity="0.33" d="M9.8995 6.24264L5.65686 2L1.41422 6.24265" stroke="#282c84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
                     '</div>' +
                     '<div id="more-information-' + i + '"></div>';
 
@@ -593,9 +616,11 @@
     function toggleMoreInformation(el, index) {
         if (el.classList.contains('opened')) {
             document.getElementById('more-information-' + index).style.display = 'none';
+            el.closest('li').classList.remove('opened');
             el.classList.remove('opened');
         } else {
             document.getElementById('more-information-' + index).style.display = 'block';
+            el.closest('li').classList.add('opened');
             el.classList.add('opened');
         }
     }
