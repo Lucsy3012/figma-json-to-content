@@ -39,7 +39,19 @@
     </div>
 
     <!-- All entries -->
-    <ul id="entries" class="primary"></ul>
+    <div class="container">
+        <div id="data-tabs">
+            <span data-id="0" contenteditable="false" class="active">Set 1</span>
+            <span data-id="1" contenteditable="false">Set 2</span>
+            <span data-id="2" contenteditable="false">Set 3</span>
+        </div>
+
+        <div id="data-entries">
+            <ul data-id="0" class="entries primary active"></ul>
+            <ul data-id="1" class="entries primary"></ul>
+            <ul data-id="2" class="entries primary"></ul>
+        </div>
+    </div>
 
     <!-- Footer -->
     <div class="container-s action-panel">
@@ -221,25 +233,46 @@
         font-weight: 600;
     }
 
-    /* Entries List */
-    ul#entries {
+    /* Tabs & Entries List */
+    #data-tabs,
+    ul.entries {
         margin: 0;
-        padding: 0 20px;
+        padding: 0;
         display: none;
     }
 
-    ul#entries li {
+    /* Tabs */
+    #data-tabs [data-id] {
+        padding: 4px 9px;
+        font-size: 11px;
+        font-weight: 600;
+        border-radius: 4px;
+        cursor: pointer;
+        opacity: .5;
+    }
+
+    #data-tabs [data-id].active {
+        background-color: var(--light-gray);
+        opacity: 1;
+    }
+
+    /* Entries List */
+    ul.entries.active {
+        display: block;
+    }
+
+    ul.entries li {
         display: block;
         margin: 4px 0;
         border-radius: 4px;
         background-color: var(--white, #fff);
     }
 
-    ul#entries li * {
+    ul.entries li * {
         pointer-events: none;
     }
 
-    ul#entries li > .main {
+    ul.entries li > .main {
         display: flex;
         flex-wrap: nowrap;
         align-items: center;
@@ -249,13 +282,13 @@
         -webkit-user-select: none;
     }
 
-    ul#entries li .index {
+    ul.entries li .index {
         display: inline-block;
         width: 22px;
         color: rgba(0,0,0,0.5);
     }
 
-    ul#entries li .name {
+    ul.entries li .name {
         display: inline-block;
         width: calc(100% - 28px);
         padding-right: 16px;
@@ -268,7 +301,7 @@
         color: rgba(0,0,0,0.5);
     }
 
-    ul#entries li .arrow {
+    ul.entries li .arrow {
         display: none;
         position: absolute;
         right: 8px;
@@ -282,44 +315,44 @@
         cursor: pointer;
     }
 
-    ul#entries li.opened .arrow {
+    ul.entries li.opened .arrow {
         transform: scaleY(1) translateY(2px);
         -webkit-transform: scaleY(1) translateY(2px);
     }
 
     /* Entries Hover */
-    ul#entries li.opened .main {
+    ul.entries li.opened .main {
         border-top-left-radius: 4px;
         border-top-right-radius: 4px;
         background-color: var(--accent-color-fade, #e6e6e6);
     }
 
-    ul#entries li:hover,
-    ul#entries li.opened {
+    ul.entries li:hover,
+    ul.entries li.opened {
         background-color: var(--accent-color-fade, #e6e6e6);
         cursor: pointer;
     }
 
-    ul#entries li:hover .index,
-    ul#entries li.opened .index {
+    ul.entries li:hover .index,
+    ul.entries li.opened .index {
         color: var(--accent-color-light, rgba(0,0,0,0.75));
     }
 
-    ul#entries li:hover .name,
-    ul#entries li.opened .name {
+    ul.entries li:hover .name,
+    ul.entries li.opened .name {
         color: var(--accent-color, #000);
     }
 
-    ul#entries li:hover .arrow {
+    ul.entries li:hover .arrow {
         display: block;
     }
 
     /* Entries More Information */
-    ul#entries li [id^="more-information"] {
+    ul.entries li [id^="more-information"] {
         display: none;
     }
 
-    ul#entries li dl {
+    ul.entries li dl {
         display: -ms-grid;
         display: grid;
         grid-template-columns: 90px auto;
@@ -331,13 +364,13 @@
         border-top: 1px solid var(--accent-color-fade, rgba(0,0,0,0.25));
     }
 
-    ul#entries li dl dt {
+    ul.entries li dl dt {
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
     }
 
-    ul#entries li dl dd {
+    ul.entries li dl dd {
         margin: 0;
     }
 
@@ -402,6 +435,7 @@
 
 <script>
     const errorMsg = document.getElementById('error-msg');
+    let activeTabIndex = 0;
 
     document.getElementById('fileupload').onchange = () => {
         const element = document.getElementById('fileupload');
@@ -426,7 +460,7 @@
                     acceptAndSendData(parent, data);
 
                     // Rename button
-                    label.textContent = files[0].name;
+                    document.querySelector('#data-tabs [data-id].active').textContent = files[0].name.split('.')[0];
                 } catch(error) {
                     if (error instanceof SyntaxError) {
                         errorMsg.innerHTML = 'The file could not be loaded. The file seems to have syntax errors.';
@@ -444,7 +478,7 @@
                     acceptAndSendData(parent, data);
 
                     // Rename button
-                    label.textContent = files[0].name;
+                    document.querySelector('#data-tabs [data-id].active').textContent = files[0].name.split('.')[0];
                 } catch(error) {
                     if (error instanceof SyntaxError) {
                         errorMsg.innerHTML = 'The file could not be loaded. The file seems to have syntax errors.';
@@ -487,24 +521,72 @@
         parent.postMessage({ pluginMessage: { type: 'fill' } }, '*')
     };
 
-    // get specific entry
-    document.getElementById('entries').addEventListener('click', function(e) {
-        if (e.target.matches('li.data-entry')) {
+    /*
+     * Data functions
+     * -----------------------
+     */
 
-            // get correct entry by comparing indexes
-            let index = e.target.attributes.index.textContent;
+    function acceptAndSendData(parent, data) {
 
-            // fill in entry
-            parent.postMessage({ pluginMessage: { type: 'fill-specific', index } }, '*')
+        // post data to ui
+        parent.postMessage({ pluginMessage: { type: 'load', data, activeTabIndex } }, '*');
+
+        // remove all entries from list
+        document.querySelector('.entries[data-id="' + activeTabIndex + '"]').innerHTML = '';
+
+        // creates for each entry a direct link in list
+        createEntries(parent, data);
+
+        // initiate action
+        document.getElementById('data-tabs').style.display = 'block';
+        document.getElementById('intro-json').style.display = 'none';
+        document.getElementById('intro-csv').style.display = 'none';
+        document.getElementById('fill').disabled = false;
+        errorMsg.innerHTML = '';
+
+        // post message to figma
+        parent.postMessage({ pluginMessage: { type: 'success', data, activeTabIndex } }, '*');
+    }
+
+    function returnValueFromID(id, fallback = ',') {
+        const input = document.getElementById(id);
+        return (input.value !== '') ? input.value : fallback;
+    }
+
+    function readCSV(e, separator = ',', ignore = '"') {
+        var reg = new RegExp('((?:[^' + separator + '' + ignore + ']+|' + ignore + '[^' + ignore + ']*' + ignore + ')+)', 'g');
+
+        const lines = e.target.result.split(/\r\n|\n/).map(function(e) {
+            return e.match(reg)
+        });
+
+        let data = [];
+        let keys = lines[0];
+
+        for (var i = 1; i <= (lines.length - 1); i++) {
+
+            var obj = {};
+
+            for (var a = 0; a <= lines[i].length; a++) {
+                const key = keys[a];
+                const value = lines[i][a];
+
+                if (key !== undefined && value !== undefined) {
+                    obj[key] = value;
+                }
+
+            }
+
+            data.push(obj);
         }
-    });
 
-    // open more information accordion of specific entry
-    document.getElementById('entries').addEventListener('click', function(e) {
-        if (e.target.matches('.arrow')) {
-            toggleMoreInformation(e.target, e.target.attributes.index.textContent);
-        }
-    });
+        return data;
+    }
+
+    /*
+     * Type selection functions
+     * -----------------------
+     */
 
     // switch file selection
     const main      = document.getElementById('main');
@@ -528,30 +610,136 @@
     });
 
     /*
-     * Functions
+     * Tab functions
      * -----------------------
      */
 
-    function acceptAndSendData(parent, data) {
+    let tabs = document.querySelectorAll('#data-tabs [data-id]');
 
-        // post data to ui
-        parent.postMessage({ pluginMessage: { type: 'load', data } }, '*');
+    for (i = 0; i < tabs.length; ++i) {
 
-        // remove all entries from list
-        document.getElementById('entries').innerHTML = '';
+        // change tab
+        tabs[i].addEventListener('click', function(e) {
+            toggleTab(e);
+        });
 
-        // creates for each entry a direct link in list
-        createEntries(parent, data);
+        // enter rewritting mode
+        tabs[i].addEventListener('dblclick', function(e) {
+            rewriteTab(e, true);
+        });
 
-        // initiate action
-        document.getElementById('entries').style.display = 'block';
-        document.getElementById('intro-json').style.display = 'none';
-        document.getElementById('intro-csv').style.display = 'none';
-        document.getElementById('fill').disabled = false;
-        errorMsg.innerHTML = '';
+        // exit rewriting mode when pressing enter
+        tabs[i].addEventListener('keydown', function(e) {
+            if (e.keyCode === 13) {
+                e.preventDefault();
 
-        // post message to figma
-        parent.postMessage({ pluginMessage: { type: 'success', data } }, '*');
+                if (e.target.attributes['contenteditable'].textContent === 'true') {
+                    rewriteTab(e, false);
+                }
+            }
+            if (e.keyCode === 27) {
+                rewriteTab(e, false);
+            }
+        });
+
+        // delete tab
+        /* todo
+        tabs[i].addEventListener('contextmenu', function(e) {
+            reindexTabs();
+
+            if (tabs.length <= 1) {
+                parent.postMessage({ pluginMessage: { type: 'warning', data: 'lastTab' } }, '*');
+            } else {
+                deleteTab(e);
+            }
+
+            reindexTabs();
+        });
+        */
+    }
+
+    function toggleTab(e) {
+        if (!e.target.classList.contains('active')) {
+            activeTabIndex = parseInt(e.target.attributes['data-id'].textContent);
+
+            // rewrite active tab
+            for (i = 0; i < tabs.length; ++i) {
+                tabs[i].classList.remove('active');
+                entriesLists[i].classList.remove('active');
+            }
+
+            tabs[activeTabIndex].classList.add('active');
+            entriesLists[activeTabIndex].classList.add('active');
+
+            rewriteTab(e, false);
+
+            parent.postMessage({ pluginMessage: { type: 'tab-changed', activeTabIndex } }, '*');
+        }
+    }
+
+    function rewriteTab(e, type) {
+        e.target.attributes['contenteditable'].textContent = type;
+    }
+
+    /*
+    function reindexTabs() {
+        tabs = document.querySelectorAll('#data-tabs [data-id]');
+        entriesLists = document.querySelectorAll('#data-entries [data-id]');
+
+        const tabsLength = tabs.length;
+
+        for (let i = 0; i < tabs.length; ++i) {
+            tabs[i].attributes['data-id'].textContent = i;
+            console.log(entriesLists[i].attributes['data-id']);
+            entriesLists[i].attributes['data-id'].textContent = i;
+        }
+    }
+
+    function deleteTab(e) {
+        const clickedTabIndex = parseInt(e.target.attributes['data-id'].textContent);
+        const closestTabIndex = clickedTabIndex <= 0 ? clickedTabIndex + 1 : clickedTabIndex - 1;
+
+        tabs[clickedTabIndex].remove();
+        entriesLists[clickedTabIndex].remove();
+
+        // If clicked tab was active
+        if (e.target.classList.contains('active')) {
+            tabs[closestTabIndex].classList.remove('active');
+            entriesLists[closestTabIndex].classList.remove('active');
+        }
+
+        parent.postMessage({pluginMessage: {type: 'tab-deleted', clickedTabIndex}}, '*');
+    }
+    */
+
+    /*
+     * Entries functions
+     * -----------------------
+     */
+
+    let entriesLists = document.querySelectorAll('#data-entries [data-id]');
+
+    // get specific entry
+    for (i = 0; i < entriesLists.length; ++i) {
+        entriesLists[i].addEventListener('click', function (e) {
+            if (e.target.matches('li.data-entry')) {
+
+                // get correct entry by comparing indexes
+                let index = e.target.attributes.index.textContent;
+
+                // fill in entry
+                parent.postMessage({pluginMessage: {type: 'fill-specific', index}}, '*')
+            }
+        });
+    }
+
+    // open more information accordion of specific entry
+    for (i = 0; i < entriesLists.length; ++i) {
+        entriesLists[i].addEventListener('click', function(e) {
+            if (e.target.matches('.arrow')) {
+                toggleMoreInformation(e.target, e.target.attributes.index.textContent);
+            }
+        });
     }
 
     function createEntries(parent, data) {
@@ -616,14 +804,14 @@
                 li.innerHTML =
                     '<div class="main">' +
                     '<span class="index">' + (i + 1) + '.</span>' +
-                        '<span class="name">' + name + '</span>' +
-                        '<span class="arrow" index="' + i + '"><svg width="11" height="12" viewBox="0 0 11 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path opacity="0.33" d="M9.8995 6.24264L5.65686 2L1.41422 6.24265" stroke="#282c84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
+                    '<span class="name">' + name + '</span>' +
+                    '<span class="arrow" index="' + i + '"><svg width="11" height="12" viewBox="0 0 11 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path opacity="0.33" d="M9.8995 6.24264L5.65686 2L1.41422 6.24265" stroke="#282c84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
                     '</div>' +
-                    '<div id="more-information-' + i + '"></div>';
+                    '<div id="more-information-' + activeTabIndex + '-' + i + '"></div>';
 
                 // append li
-                document.getElementById('entries').appendChild(li);
-                document.getElementById('more-information-' + i).appendChild(dl);
+                document.querySelector('.entries[data-id="' + activeTabIndex + '"]').appendChild(li);
+                document.getElementById('more-information-' + activeTabIndex + '-' + i).appendChild(dl);
                 i++;
             }
         }
@@ -631,49 +819,14 @@
 
     function toggleMoreInformation(el, index) {
         if (el.classList.contains('opened')) {
-            document.getElementById('more-information-' + index).style.display = 'none';
+            document.getElementById('more-information-' + activeTabIndex + '-' + index).style.display = 'none';
             el.closest('li').classList.remove('opened');
             el.classList.remove('opened');
         } else {
-            document.getElementById('more-information-' + index).style.display = 'block';
+            document.getElementById('more-information-' + activeTabIndex + '-' + index).style.display = 'block';
             el.closest('li').classList.add('opened');
             el.classList.add('opened');
         }
-    }
-
-    function returnValueFromID(id, fallback = ',') {
-        const input = document.getElementById(id);
-        return (input.value !== '') ? input.value : fallback;
-    }
-
-    function readCSV(e, separator = ',', ignore = '"') {
-        var reg = new RegExp('((?:[^' + separator + '' + ignore + ']+|' + ignore + '[^' + ignore + ']*' + ignore + ')+)', 'g');
-
-        const lines = e.target.result.split(/\r\n|\n/).map(function(e) {
-            return e.match(reg)
-        });
-
-        let data = [];
-        let keys = lines[0];
-
-        for (var i = 1; i <= (lines.length - 1); i++) {
-
-            var obj = {};
-
-            for (var a = 0; a <= lines[i].length; a++) {
-                const key = keys[a];
-                const value = lines[i][a];
-
-                if (key !== undefined && value !== undefined) {
-                    obj[key] = value;
-                }
-
-            }
-
-            data.push(obj);
-        }
-
-        return data;
     }
 
 </script>

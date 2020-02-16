@@ -2,7 +2,9 @@
 figma.showUI(__html__, { height: 428});
 
 // Create empty data
+let datasets = {};
 let data = [];
+let activeTabIndex = 0;
 let keys;
 let random;
 
@@ -12,6 +14,8 @@ figma.ui.onmessage = msg => {
   if (msg.type === 'load') {
     data = [];
     data = msg.data;
+    activeTabIndex = msg.activeTabIndex;
+    datasets[activeTabIndex] = data;
 
     if (msg.data !== []) {
 
@@ -28,6 +32,31 @@ figma.ui.onmessage = msg => {
   if (msg.type === 'success') {
     figma.notify('Data has been loaded successfully. Have fun!');
   }
+
+  // Tab changed
+  if (msg.type === 'tab-changed') {
+    activeTabIndex = msg.activeTabIndex;
+  }
+
+  // Tab deleted
+  /* todo
+  if (msg.type === 'tab-deleted') {
+    delete datasets[msg.clickedTabIndex];
+    reindexData(datasets);
+  }
+
+  function reindexData(datasets) {
+    let keys = Object.keys(datasets);
+
+    // console.log(datasets, keys, keys.length);
+
+    for (let i = 0; i < keys.length; ++i) {
+      Object.defineProperty(datasets, keys[i], datasets[i]);
+    }
+
+    // console.log(datasets, keys, keys.length);
+  }
+  */
 
   // Fill in random entry
   if (msg.type === 'fill') {
@@ -51,6 +80,9 @@ figma.ui.onmessage = msg => {
 
     // Empty object notification
     notifyWarning('emptyObject', 'I have discovered some empty objects and skipped those.');
+
+    // Empty object notification
+    notifyWarning('lastTab', 'You may not delete the last available tab.');
   }
 
   function loadFontsFrom(layer) {
@@ -62,12 +94,12 @@ figma.ui.onmessage = msg => {
   function getData() {
 
     // Get keys of data after import
-    for (const dataNodes of data) {
+    for (const dataNodes of datasets[activeTabIndex]) {
       keys = Object.keys(dataNodes);
     }
 
     // Get length and render a random number
-    let len = data.length;
+    let len = datasets[activeTabIndex].length;
     random = Math.floor(Math.random() * len);
   }
 
@@ -100,7 +132,7 @@ figma.ui.onmessage = msg => {
           // Rewrite layer text with value of each key
           for (const layer of textLayers) {
             await loadFontsFrom(layer);
-            layer.characters = data[index][key].toString();
+            layer.characters = datasets[activeTabIndex][index][key].toString();
           }
         }
       }
