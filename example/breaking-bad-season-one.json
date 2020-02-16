@@ -2,6 +2,7 @@
   {
     "episode": "1",
     "title": "Pilot",
+    "image": "https://i.ytimg.com/vi/IaGbPAgJEs8/maxresdefault.jpg",
     "releaseDate": "January 20, 2008",
     "millionViewers": 1.41,
     "directedBy": "Vince Gilligan",
@@ -10,6 +11,7 @@
   {
     "episode": "2",
     "title": "Cat's in the Bag...",
+    "image": "https://i.ytimg.com/vi/IaGbPAgJEs8/maxresdefault.jpg",
     "releaseDate": "January 27, 2008",
     "millionViewers": 1.49,
     "directedBy": "Adam Bernstein",
@@ -18,6 +20,7 @@
   {
     "episode": "3",
     "title": "...And the Bag's in the River",
+    "image": "https://i.ytimg.com/vi/IaGbPAgJEs8/maxresdefault.jpg",
     "releaseDate": "February 10, 2008",
     "millionViewers": 1.08,
     "directedBy": "Adam Bernstein",
@@ -26,6 +29,7 @@
   {
     "episode": "4",
     "title": "Cancer Man",
+    "image": "https://i.ytimg.com/vi/IaGbPAgJEs8/maxresdefault.jpg",
     "releaseDate": "February 17, 2008",
     "millionViewers": 1.09,
     "directedBy": "Jim McKay",
@@ -34,6 +38,7 @@
   {
     "episode": "5",
     "title": "Gray Matter",
+    "image": "https://i.ytimg.com/vi/IaGbPAgJEs8/maxresdefault.jpg",
     "releaseDate": "February 24, 2008",
     "millionViewers": "N/A",
     "directedBy": "Tricia Brock",
@@ -42,6 +47,7 @@
   {
     "episode": "6",
     "title": "Crazy Handful of Nothin'",
+    "image": "https://i.ytimg.com/vi/IaGbPAgJEs8/maxresdefault.jpg",
     "releaseDate": "March 2, 2008",
     "millionViewers": 1.07,
     "directedBy": "Bronwen Hughes",
@@ -50,6 +56,7 @@
   {
     "episode": "7",
     "title": "A No-Rough-Stuff-Type Deal",
+    "image": "https://i.ytimg.com/vi/IaGbPAgJEs8/maxresdefault.jpg",
     "releaseDate": "March 9, 2008",
     "millionViewers": 1.50,
     "directedBy": "Tim Hunter",

@@ -75,6 +75,26 @@ figma.ui.onmessage = msg => {
                         }
                     }
                 }
+                // If selection is single object with fill
+                if (node.type === "RECTANGLE" || node.type === "POLYGON" || node.type === "ELLIPSE" || node.type === "VECTOR") {
+                    const newFills = [];
+                    for (const key of keys) {
+                        if (node.name === key) {
+                            for (const paint of node.fills) {
+                                if (paint.type === 'IMAGE') {
+                                    // console.log(data[index][key], paint, figma.getImageByHash(paint.imageHash));
+                                    // Send the raw bytes of the file to the worker.
+                                    // todo
+                                    /*
+                                    const newPaint = JSON.parse(JSON.stringify(paint))
+                                    newPaint.imageHash = figma.createImage(newBytes).hash
+                                    newFills.push(newPaint)
+                                    */
+                                }
+                            }
+                        }
+                    }
+                }
                 // If selection contains more TextNodes
                 else {
                     // Get keys of data
@@ -90,6 +110,40 @@ figma.ui.onmessage = msg => {
                     }
                 }
             }
+        });
+    }
+    // Encoding an image is also done by sticking pixels in an
+    // HTML canvas and by asking the canvas to serialize it into
+    // an actual PNG file via canvas.toBlob().
+    function encode(canvas, ctx, imageData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            ctx.putImageData(imageData, 0, 0);
+            return yield new Promise((resolve, reject) => {
+                canvas.toBlob(blob => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(new Uint8Array(reader.result));
+                    reader.onerror = () => reject(new Error('Could not read from blob'));
+                    reader.readAsArrayBuffer(blob);
+                });
+            });
+        });
+    }
+    // Decoding an image can be done by sticking it in an HTML
+    // canvas, as we can read individual pixels off the canvas.
+    function decode(canvas, ctx, bytes) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const url = URL.createObjectURL(new Blob([bytes]));
+            const image = yield new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => reject();
+                img.src = url;
+            });
+            canvas.width = image.width;
+            canvas.height = image.height;
+            ctx.drawImage(image, 0, 0);
+            const imageData = ctx.getImageData(0, 0, image.width, image.height);
+            return imageData;
         });
     }
     function notifyWarning(data, text) {
