@@ -2,14 +2,21 @@
 
     <!-- Loading content -->
     <div class="json--active" id="main">
-        <div class="file-selection-panel">
-            <strong>Choose your file settings:</strong>
-            <input type="radio" name="file-type" id="json" checked />
-            <label for="json" id="file-json">JSON</label>
-            <input type="radio" name="file-type" id="csv" />
-            <label for="csv" id="file-csv">CSV</label>
-        </div>
-        <div class="container">
+        <div class="options-panel container-s">
+
+            <!-- File Type Selection -->
+            <div class="file-selection-panel">
+                <strong>Choose your file settings:</strong>
+                <input type="radio" name="file-type" id="json" checked />
+                <label for="json" id="file-json">JSON</label>
+                <input type="radio" name="file-type" id="csv" />
+                <label for="csv" id="file-csv">CSV</label>
+            </div>
+
+            <!-- Break -->
+            <div class="break-100"></div>
+
+            <!-- File Selection -->
             <div class="loading-panel">
 
                 <!-- Input: Fetch file from url (JSON only) -->
@@ -32,20 +39,26 @@
                 <div class="inactive-csv break"></div>
                 <label for="fileupload" id="fileupload-label" class="btn">Upload file</label>
             </div>
-            <p class="introduction-text inactive-csv" id="intro-json">Overwrite multiple text layers with real and coherent, yet randomized data. Simply load your JSON to set up some content. Then select a group or a frame and click “Fill with random entry”. The generator will pick a random entry but keeps the set together.</p>
-            <p class="introduction-text inactive-json" id="intro-csv">¹ Most .csv files are separated by <b>,</b> or by <b>;</b><br/>The default value is <b>,</b><br/><br/>Optionally you can pass a character that indicates when the character you've set to be your separator should be printed, for example when it's surrounded by <b>"</b>. So a number like 1,000 can be printed within a comma-separated .csv if you write "1,000" instead.<br/>The default value is <b>"</b></p>
-            <p class="msg error" id="error-msg"></p>
         </div>
+
+        <p class="container introduction-text inactive-csv" id="intro-json">Overwrite multiple text layers with real and coherent, yet randomized data. Simply load your JSON to set up some content. Then select a group or a frame and click “Fill with random entry”. The generator will pick a random entry but keeps the set together.</p>
+        <p class="container introduction-text inactive-json" id="intro-csv">¹ Most .csv files are separated by <b>,</b> or by <b>;</b><br/>The default value is <b>,</b><br/><br/>Optionally you can pass a character that indicates when the character you've set to be your separator should be printed, for example when it's surrounded by <b>"</b>. So a number like 1,000 can be printed within a comma-separated .csv if you write "1,000" instead.<br/>The default value is <b>"</b></p>
     </div>
 
-    <!-- All entries -->
     <div class="container">
+        <p class="msg error" id="error-msg"></p>
+
+        <!-- Tabs -->
         <div id="data-tabs">
             <span data-id="0" contenteditable="false" class="active">Set 1</span>
             <span data-id="1" contenteditable="false">Set 2</span>
             <span data-id="2" contenteditable="false">Set 3</span>
         </div>
 
+        <!-- Break -->
+        <div class="break-100"></div>
+
+        <!-- List of Items -->
         <div id="data-entries">
             <ul data-id="0" class="entries primary active"></ul>
             <ul data-id="1" class="entries primary"></ul>
@@ -104,6 +117,10 @@
         -moz-osx-font-smoothing: grayscale;
         text-rendering: geometricPrecision;
     }
+    ul {
+        margin: 0;
+        padding: 0;
+    }
     .container {
         padding: 20px;
     }
@@ -116,6 +133,9 @@
     p b, p strong {
         color: #000;
         font-weight: 600;
+    }
+    p.container {
+        margin: 0;
     }
     p:empty,
     ul:empty {
@@ -198,14 +218,17 @@
         margin-left: auto;
     }
 
+    /* Options Panel */
+    .options-panel {
+        background-color: #f5f5f5;
+        border-bottom: 1px solid var(--border-gray);
+    }
+
     /* File Selection Panel */
     .file-selection-panel {
         align-items: center;
         display: flex;
         flex-wrap: wrap;
-        padding: 6px 20px;
-        background-color: #f5f5f5;
-        border-bottom: 1px solid var(--border-gray);
     }
 
     .file-selection-panel > * {
@@ -236,23 +259,26 @@
     /* Tabs & Entries List */
     #data-tabs,
     ul.entries {
-        margin: 0;
-        padding: 0;
         display: none;
     }
 
     /* Tabs */
     #data-tabs [data-id] {
-        padding: 4px 9px;
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 600;
-        border-radius: 4px;
         cursor: pointer;
         opacity: .5;
     }
 
+    #data-tabs [data-id] + [data-id] {
+        margin-left: 14px;
+    }
+
+    #data-tabs [data-id]:hover {
+        opacity: .66;
+    }
+
     #data-tabs [data-id].active {
-        background-color: var(--light-gray);
         opacity: 1;
     }
 
@@ -421,6 +447,7 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
+        opacity: 1;
     }
 
     .json--active .inactive-json,

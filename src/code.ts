@@ -1,5 +1,5 @@
 // This shows the HTML page in "ui.html".
-figma.showUI(__html__, { height: 428});
+figma.showUI(__html__, { height: 438});
 
 // Create empty data
 let datasets = {};
