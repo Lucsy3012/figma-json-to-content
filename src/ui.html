@@ -39,6 +39,17 @@
                 <div class="inactive-csv break"></div>
                 <label for="fileupload" id="fileupload-label" class="btn">Upload file</label>
             </div>
+
+            <!-- Break -->
+            <div class="break-100"></div>
+
+            <!-- Tabs -->
+            <div class="tabs-panel primary">
+                <div id="data-tabs">
+                    <span data-id="0" contenteditable="false" class="tab active">My dataset</span>
+                </div>
+                <span id="add" onclick="addTab()" title="Open a new tab"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.5 4L6.5 9M9 6.5L4 6.5M12 6.5C12 9.53757 9.53757 12 6.5 12C3.46243 12 1 9.53757 1 6.5C1 3.46243 3.46243 1 6.5 1C9.53757 1 12 3.46243 12 6.5Z" stroke="#C4C4C4"/></svg></span>
+            </div>
         </div>
 
         <p class="container introduction-text inactive-csv" id="intro-json">Overwrite multiple text layers with real and coherent, yet randomized data. Simply load your JSON to set up some content. Then select a group or a frame and click “Fill with random entry”. The generator will pick a random entry but keeps the set together.</p>
@@ -48,21 +59,9 @@
     <div class="container">
         <p class="msg error" id="error-msg"></p>
 
-        <!-- Tabs -->
-        <div id="data-tabs">
-            <span data-id="0" contenteditable="false" class="active">Set 1</span>
-            <span data-id="1" contenteditable="false">Set 2</span>
-            <span data-id="2" contenteditable="false">Set 3</span>
-        </div>
-
-        <!-- Break -->
-        <div class="break-100"></div>
-
         <!-- List of Items -->
-        <div id="data-entries">
-            <ul data-id="0" class="entries primary active"></ul>
-            <ul data-id="1" class="entries primary"></ul>
-            <ul data-id="2" class="entries primary"></ul>
+        <div id="data-entries" class="primary">
+            <ul data-id="0" class="entries active"></ul>
         </div>
     </div>
 
@@ -222,6 +221,7 @@
     .options-panel {
         background-color: #f5f5f5;
         border-bottom: 1px solid var(--border-gray);
+        padding-bottom: 0;
     }
 
     /* File Selection Panel */
@@ -256,33 +256,63 @@
         font-weight: 600;
     }
 
-    /* Tabs & Entries List */
-    #data-tabs,
-    ul.entries {
-        display: none;
+    /* Tabs */
+    .tabs-panel {
+        flex-wrap: wrap;
+        -webkit-flex-wrap: nowrap;
+        position: relative;
+        top: 2px;
     }
 
-    /* Tabs */
+    .tabs-panel #add {
+        display: inline-block;
+        position: relative;
+        padding: 7px;
+        margin-left: 3px;
+        top: 1px;
+        cursor: pointer;
+    }
+
+    .tabs-panel #add:hover path {
+        stroke: var(--accent-color, rgba(0,0,0,1));
+    }
+
+    #data-tabs {
+        display: inline-flex;
+        max-width: 210px;
+        overflow-x: auto;
+    }
+
     #data-tabs [data-id] {
+        display: inline-block;
+        padding: 6px 0;
         font-size: 12px;
-        font-weight: 600;
+        font-weight: 400;
         cursor: pointer;
         opacity: .5;
+        border-bottom: 2px solid transparent;
     }
 
     #data-tabs [data-id] + [data-id] {
-        margin-left: 14px;
+        margin-left: 13px;
     }
 
     #data-tabs [data-id]:hover {
         opacity: .66;
+        border-bottom-color: var(--accent-color-fade, rgba(0,0,0,15));
     }
 
     #data-tabs [data-id].active {
+        font-weight: 600;
         opacity: 1;
+        border-bottom-color: var(--accent-color, rgba(0,0,0,1));
     }
 
     /* Entries List */
+    ul.entries {
+        display: none;
+    }
+
     ul.entries.active {
         display: block;
     }
@@ -463,6 +493,7 @@
 <script>
     const errorMsg = document.getElementById('error-msg');
     let activeTabIndex = 0;
+    let createdTabs = 1;
 
     document.getElementById('fileupload').onchange = () => {
         const element = document.getElementById('fileupload');
@@ -565,14 +596,13 @@
         createEntries(parent, data);
 
         // initiate action
-        document.getElementById('data-tabs').style.display = 'block';
         document.getElementById('intro-json').style.display = 'none';
         document.getElementById('intro-csv').style.display = 'none';
         document.getElementById('fill').disabled = false;
         errorMsg.innerHTML = '';
 
         // post message to figma
-        parent.postMessage({ pluginMessage: { type: 'success', data, activeTabIndex } }, '*');
+        parent.postMessage({ pluginMessage: { type: 'success', data } }, '*');
     }
 
     function returnValueFromID(id, fallback = ',') {
@@ -641,49 +671,52 @@
      * -----------------------
      */
 
+    const tabsHolder = document.querySelector('#data-tabs');
+    const entriesHolder = document.querySelector('#data-entries');
+
     let tabs = document.querySelectorAll('#data-tabs [data-id]');
 
-    for (i = 0; i < tabs.length; ++i) {
-
-        // change tab
-        tabs[i].addEventListener('click', function(e) {
+    // change tab
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('.tab[data-id]')) {
             toggleTab(e);
-        });
+        }
+    });
 
-        // enter rewritting mode
-        tabs[i].addEventListener('dblclick', function(e) {
+    // enter rewritting mode
+    document.addEventListener('dblclick', function(e) {
+        if (e.target.matches('.tab[data-id]')) {
             rewriteTab(e, true);
-        });
+        }
+    });
 
-        // exit rewriting mode when pressing enter
-        tabs[i].addEventListener('keydown', function(e) {
+    // exit rewriting mode when pressing enter
+    document.addEventListener('keydown', function(e) {
+        if (e.target.matches('.tab[data-id]')) {
             if (e.keyCode === 13) {
                 e.preventDefault();
 
-                if (e.target.attributes['contenteditable'].textContent === 'true') {
+                if (e.target.matches('[contenteditable="true"]')) {
                     rewriteTab(e, false);
                 }
             }
             if (e.keyCode === 27) {
                 rewriteTab(e, false);
             }
-        });
+        }
+    });
 
-        // delete tab
-        /* todo
-        tabs[i].addEventListener('contextmenu', function(e) {
-            reindexTabs();
-
+    document.addEventListener('contextmenu', function(e) {
+        if (e.target.matches('.tab[data-id]')) {
             if (tabs.length <= 1) {
-                parent.postMessage({ pluginMessage: { type: 'warning', data: 'lastTab' } }, '*');
+                parent.postMessage({pluginMessage: {type: 'warning', data: 'lastTab'}}, '*');
             } else {
                 deleteTab(e);
             }
 
             reindexTabs();
-        });
-        */
-    }
+        }
+    });
 
     function toggleTab(e) {
         if (!e.target.classList.contains('active')) {
@@ -693,10 +726,15 @@
             for (i = 0; i < tabs.length; ++i) {
                 tabs[i].classList.remove('active');
                 entriesLists[i].classList.remove('active');
-            }
 
-            tabs[activeTabIndex].classList.add('active');
-            entriesLists[activeTabIndex].classList.add('active');
+                if (tabs[i].matches('[data-id="' + activeTabIndex + '"]')) {
+                    tabs[i].classList.add('active');
+                }
+
+                if (entriesLists[i].matches('[data-id="' + activeTabIndex + '"]')) {
+                    entriesLists[i].classList.add('active');
+                }
+            }
 
             rewriteTab(e, false);
 
@@ -708,36 +746,46 @@
         e.target.attributes['contenteditable'].textContent = type;
     }
 
-    /*
     function reindexTabs() {
         tabs = document.querySelectorAll('#data-tabs [data-id]');
         entriesLists = document.querySelectorAll('#data-entries [data-id]');
+    }
 
-        const tabsLength = tabs.length;
+    function addTab() {
+        let newTab = document.createElement('span');
 
-        for (let i = 0; i < tabs.length; ++i) {
-            tabs[i].attributes['data-id'].textContent = i;
-            console.log(entriesLists[i].attributes['data-id']);
-            entriesLists[i].attributes['data-id'].textContent = i;
-        }
+        newTab.setAttribute('data-id', createdTabs);
+        newTab.setAttribute('contenteditable', 'false');
+        newTab.setAttribute('class', 'tab');
+        newTab.innerHTML = 'New Tab';
+
+        let newEntry = document.createElement('ul');
+        newEntry.setAttribute('data-id', createdTabs);
+        newEntry.setAttribute('class', 'entries');
+
+        tabsHolder.appendChild(newTab);
+        entriesHolder.appendChild(newEntry);
+
+        createdTabs++;
+
+        reindexTabs();
     }
 
     function deleteTab(e) {
         const clickedTabIndex = parseInt(e.target.attributes['data-id'].textContent);
-        const closestTabIndex = clickedTabIndex <= 0 ? clickedTabIndex + 1 : clickedTabIndex - 1;
 
-        tabs[clickedTabIndex].remove();
-        entriesLists[clickedTabIndex].remove();
+        for (i = 0; i < tabs.length; ++i) {
+            if (tabs[i].matches('[data-id="' + clickedTabIndex + '"]')) {
+                tabs[i].remove();
+            }
 
-        // If clicked tab was active
-        if (e.target.classList.contains('active')) {
-            tabs[closestTabIndex].classList.remove('active');
-            entriesLists[closestTabIndex].classList.remove('active');
+            if (entriesLists[i].matches('[data-id="' + clickedTabIndex + '"]')) {
+                entriesLists[i].remove();
+            }
         }
 
         parent.postMessage({pluginMessage: {type: 'tab-deleted', clickedTabIndex}}, '*');
     }
-    */
 
     /*
      * Entries functions
@@ -747,27 +795,20 @@
     let entriesLists = document.querySelectorAll('#data-entries [data-id]');
 
     // get specific entry
-    for (i = 0; i < entriesLists.length; ++i) {
-        entriesLists[i].addEventListener('click', function (e) {
-            if (e.target.matches('li.data-entry')) {
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('li.data-entry')) {
 
-                // get correct entry by comparing indexes
-                let index = e.target.attributes.index.textContent;
+            // get correct entry by comparing indexes
+            let index = e.target.attributes.index.textContent;
 
-                // fill in entry
-                parent.postMessage({pluginMessage: {type: 'fill-specific', index}}, '*')
-            }
-        });
-    }
+            // fill in entry
+            parent.postMessage({pluginMessage: {type: 'fill-specific', index}}, '*')
+        }
 
-    // open more information accordion of specific entry
-    for (i = 0; i < entriesLists.length; ++i) {
-        entriesLists[i].addEventListener('click', function(e) {
-            if (e.target.matches('.arrow')) {
-                toggleMoreInformation(e.target, e.target.attributes.index.textContent);
-            }
-        });
-    }
+        if (e.target.matches('.arrow')) {
+            toggleMoreInformation(e.target, e.target.attributes.index.textContent);
+        }
+    });
 
     function createEntries(parent, data) {
         let i = 0;

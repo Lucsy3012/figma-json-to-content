@@ -38,24 +38,9 @@ figma.ui.onmessage = msg => {
         activeTabIndex = msg.activeTabIndex;
     }
     // Tab deleted
-    /* todo
     if (msg.type === 'tab-deleted') {
-      delete datasets[msg.clickedTabIndex];
-      reindexData(datasets);
+        delete datasets[msg.clickedTabIndex];
     }
-  
-    function reindexData(datasets) {
-      let keys = Object.keys(datasets);
-  
-      // console.log(datasets, keys, keys.length);
-  
-      for (let i = 0; i < keys.length; ++i) {
-        Object.defineProperty(datasets, keys[i], datasets[i]);
-      }
-  
-      // console.log(datasets, keys, keys.length);
-    }
-    */
     // Fill in random entry
     if (msg.type === 'fill') {
         getData();
