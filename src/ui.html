@@ -436,7 +436,7 @@
 
     /* Messages */
     .msg {
-        margin: 18px 0 0;
+        margin: 0;
         padding: 6px 14px;
         border-radius: 4px;
         color: var(--accent-color, #000);
@@ -567,7 +567,7 @@
                 if (data.success === false) {
                     errorMsg.innerHTML = 'You have no permission to fetch this data. Please provide an URL that\'s publicly available.';
                 } else {
-                    acceptAndSendData(parent, data);
+                    acceptAndSendData(parent, data, activeTabIndex);
                 }
             })
             .catch(error => {
