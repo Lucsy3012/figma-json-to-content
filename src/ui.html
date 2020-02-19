@@ -21,7 +21,7 @@
 
                 <!-- Input: Fetch file from url (JSON only) -->
                 <label class="inactive-csv" for="data">URL:</label>
-                <input class="inactive-csv" id="data" name="data" placeholder="https://path/to/data.json" />
+                <input class="inactive-csv" id="data" name="data" placeholder="https://path/to/public/data.json" />
 
                 <!-- Input: Separator (CSV only)  -->
                 <label class="inactive-json" for="separator">Separator¹:</label>
@@ -35,9 +35,9 @@
                 <div class="break-100"></div>
 
                 <!-- Buttons -->
-                <button class="inactive-csv" id="load">From URL</button>
+                <button class="inactive-csv" id="load" title="Click to read the content of the provided URL.">From URL</button>
                 <div class="inactive-csv break"></div>
-                <label for="fileupload" id="fileupload-label" class="btn">Upload file</label>
+                <label for="fileupload" id="fileupload-label" class="btn" title="Click to upload a local file.">Upload file</label>
             </div>
 
             <!-- Break -->
@@ -45,14 +45,14 @@
 
             <!-- Tabs -->
             <div class="tabs-panel primary">
-                <div id="data-tabs">
-                    <span data-id="0" contenteditable="false" class="tab active">My dataset</span>
+                <div id="data-tabs" title="Click to select the tab. Click three times to rename the tab.">
+                    <span data-id="0" contenteditable="false" class="tab active">New Tab</span>
                 </div>
-                <span id="add" onclick="addTab()" title="Open a new tab"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.5 4L6.5 9M9 6.5L4 6.5M12 6.5C12 9.53757 9.53757 12 6.5 12C3.46243 12 1 9.53757 1 6.5C1 3.46243 3.46243 1 6.5 1C9.53757 1 12 3.46243 12 6.5Z" stroke="#C4C4C4"/></svg></span>
+                <span id="add" onclick="addTab()" title="Open a new tab. Right click on a to delete it."><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.5 4L6.5 9M9 6.5L4 6.5M12 6.5C12 9.53757 9.53757 12 6.5 12C3.46243 12 1 9.53757 1 6.5C1 3.46243 3.46243 1 6.5 1C9.53757 1 12 3.46243 12 6.5Z" stroke="#C4C4C4"/></svg></span>
             </div>
         </div>
 
-        <p class="container introduction-text inactive-csv" id="intro-json">Overwrite multiple text layers with real and coherent, yet randomized data. Simply load your JSON to set up some content. Then select a group or a frame and click “Fill with random entry”. The generator will pick a random entry but keeps the set together.</p>
+        <p class="container introduction-text inactive-csv" id="intro-json">Overwrite multiple text layers with real and coherent data. Upload your file, select a group or a frame and click “Random entry” or a specific dataset from the list you'll receive.</p>
         <p class="container introduction-text inactive-json" id="intro-csv">¹ Most .csv files are separated by <b>,</b> or by <b>;</b><br/>The default value is <b>,</b><br/><br/>Optionally you can pass a character that indicates when the character you've set to be your separator should be printed, for example when it's surrounded by <b>"</b>. So a number like 1,000 can be printed within a comma-separated .csv if you write "1,000" instead.<br/>The default value is <b>"</b></p>
     </div>
 
@@ -67,7 +67,7 @@
 
     <!-- Footer -->
     <div class="container-s action-panel">
-        <button id="fill" class="primary" disabled>Fill with random entry</button>
+        <button id="fill" class="primary" disabled title="Select a random entry from the active list.">Random entry</button>
         <button id="close">Close</button>
     </div>
 </body>
@@ -267,7 +267,7 @@
     .tabs-panel #add {
         display: inline-block;
         position: relative;
-        padding: 7px;
+        padding: 7px 6px 7px;
         margin-left: 3px;
         top: 1px;
         cursor: pointer;
@@ -291,6 +291,9 @@
         cursor: pointer;
         opacity: .5;
         border-bottom: 2px solid transparent;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
     }
 
     #data-tabs [data-id] + [data-id] {
@@ -322,6 +325,7 @@
         margin: 4px 0;
         border-radius: 4px;
         background-color: var(--white, #fff);
+        overflow: hidden;
     }
 
     ul.entries li * {
@@ -460,10 +464,10 @@
         padding: 5px 11px;
         font-size: 11px;
         font-weight: 500;
-        border: 0;
         border-radius: 4px;
         margin-left: 16px;
         background-color: var(--middle-gray, #eeeeee);
+        border: 1px solid var(--border-gray, #cdcdcd);
     }
 
     #fileupload, input[type="radio"] {
@@ -493,7 +497,7 @@
 <script>
     const errorMsg = document.getElementById('error-msg');
     let activeTabIndex = 0;
-    let createdTabs = 1;
+    let createdTabs = 0;
 
     document.getElementById('fileupload').onchange = () => {
         const element = document.getElementById('fileupload');
@@ -515,10 +519,10 @@
                     // Read CSV, check for separator type
                     const data = readCSV(e, returnValueFromID('separator', ','), returnValueFromID('ignore', '"'));
 
-                    acceptAndSendData(parent, data);
+                    acceptAndSendData(parent, data, activeTabIndex);
 
                     // Rename button
-                    document.querySelector('#data-tabs [data-id].active').textContent = files[0].name.split('.')[0];
+                    document.querySelector('#data-tabs [data-id="' + activeTabIndex + '"]').textContent = files[0].name.split('.')[0];
                 } catch(error) {
                     if (error instanceof SyntaxError) {
                         errorMsg.innerHTML = 'The file could not be loaded. The file seems to have syntax errors.';
@@ -533,10 +537,10 @@
                 try {
                     const data = JSON.parse(e.target.result);
 
-                    acceptAndSendData(parent, data);
+                    acceptAndSendData(parent, data, activeTabIndex);
 
                     // Rename button
-                    document.querySelector('#data-tabs [data-id].active').textContent = files[0].name.split('.')[0];
+                    document.querySelector('#data-tabs [data-id="' + activeTabIndex + '"]').textContent = files[0].name.split('.')[0];
                 } catch(error) {
                     if (error instanceof SyntaxError) {
                         errorMsg.innerHTML = 'The file could not be loaded. The file seems to have syntax errors.';
@@ -584,7 +588,7 @@
      * -----------------------
      */
 
-    function acceptAndSendData(parent, data) {
+    function acceptAndSendData(parent, data, activeTabIndex) {
 
         // post data to ui
         parent.postMessage({ pluginMessage: { type: 'load', data, activeTabIndex } }, '*');
@@ -598,7 +602,7 @@
         // initiate action
         document.getElementById('intro-json').style.display = 'none';
         document.getElementById('intro-csv').style.display = 'none';
-        document.getElementById('fill').disabled = false;
+        document.getElementById('fill').removeAttribute('disabled');
         errorMsg.innerHTML = '';
 
         // post message to figma
@@ -733,6 +737,12 @@
 
                 if (entriesLists[i].matches('[data-id="' + activeTabIndex + '"]')) {
                     entriesLists[i].classList.add('active');
+
+                    if (entriesLists[i].children.length < 1) {
+                        document.getElementById('fill').setAttribute('disabled', 'disabled');
+                    } else {
+                        document.getElementById('fill').removeAttribute('disabled');
+                    }
                 }
             }
 
@@ -752,6 +762,9 @@
     }
 
     function addTab() {
+        console.log({activeTabIndex}, {createdTabs});
+        createdTabs++;
+
         let newTab = document.createElement('span');
 
         newTab.setAttribute('data-id', createdTabs);
@@ -765,8 +778,6 @@
 
         tabsHolder.appendChild(newTab);
         entriesHolder.appendChild(newEntry);
-
-        createdTabs++;
 
         reindexTabs();
     }
