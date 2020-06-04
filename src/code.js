@@ -7,9 +7,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 // This shows the HTML page in "ui.html".
-figma.showUI(__html__, { height: 428 });
+figma.showUI(__html__, { height: 438 });
 // Create empty data
+let datasets = {};
 let data = [];
+let activeTabIndex = 0;
 let keys;
 let random;
 figma.ui.onmessage = msg => {
@@ -17,6 +19,8 @@ figma.ui.onmessage = msg => {
     if (msg.type === 'load') {
         data = [];
         data = msg.data;
+        activeTabIndex = msg.activeTabIndex;
+        datasets[activeTabIndex] = data;
         if (msg.data !== []) {
             // Load every text style in use once
             const textNodes = figma.root.findAll(node => node.type === "TEXT");
@@ -28,6 +32,14 @@ figma.ui.onmessage = msg => {
     // Success
     if (msg.type === 'success') {
         figma.notify('Data has been loaded successfully. Have fun!');
+    }
+    // Tab changed
+    if (msg.type === 'tab-changed') {
+        activeTabIndex = msg.activeTabIndex;
+    }
+    // Tab deleted
+    if (msg.type === 'tab-deleted') {
+        delete datasets[msg.clickedTabIndex];
     }
     // Fill in random entry
     if (msg.type === 'fill') {
@@ -47,6 +59,8 @@ figma.ui.onmessage = msg => {
     if (msg.type === 'warning') {
         // Empty object notification
         notifyWarning('emptyObject', 'I have discovered some empty objects and skipped those.');
+        // Empty object notification
+        notifyWarning('lastTab', 'You may not delete the last available tab.');
     }
     function loadFontsFrom(layer) {
         return new Promise(resolve => {
@@ -55,11 +69,11 @@ figma.ui.onmessage = msg => {
     }
     function getData() {
         // Get keys of data after import
-        for (const dataNodes of data) {
+        for (const dataNodes of datasets[activeTabIndex]) {
             keys = Object.keys(dataNodes);
         }
         // Get length and render a random number
-        let len = data.length;
+        let len = datasets[activeTabIndex].length;
         random = Math.floor(Math.random() * len);
     }
     function selectData(index) {
@@ -105,7 +119,7 @@ figma.ui.onmessage = msg => {
                         // Rewrite layer text with value of each key
                         for (const layer of textLayers) {
                             yield loadFontsFrom(layer);
-                            layer.characters = data[index][key].toString();
+                            layer.characters = datasets[activeTabIndex][index][key].toString();
                         }
                     }
                 }

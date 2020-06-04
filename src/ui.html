@@ -2,19 +2,26 @@
 
     <!-- Loading content -->
     <div class="json--active" id="main">
-        <div class="file-selection-panel">
-            <strong>Choose your file settings:</strong>
-            <input type="radio" name="file-type" id="json" checked />
-            <label for="json" id="file-json">JSON</label>
-            <input type="radio" name="file-type" id="csv" />
-            <label for="csv" id="file-csv">CSV</label>
-        </div>
-        <div class="container">
+        <div class="options-panel container-s">
+
+            <!-- File Type Selection -->
+            <div class="file-selection-panel">
+                <strong>Choose your file settings:</strong>
+                <input type="radio" name="file-type" id="json" checked />
+                <label for="json" id="file-json">JSON</label>
+                <input type="radio" name="file-type" id="csv" />
+                <label for="csv" id="file-csv">CSV</label>
+            </div>
+
+            <!-- Break -->
+            <div class="break-100"></div>
+
+            <!-- File Selection -->
             <div class="loading-panel">
 
                 <!-- Input: Fetch file from url (JSON only) -->
                 <label class="inactive-csv" for="data">URL:</label>
-                <input class="inactive-csv" id="data" name="data" placeholder="https://path/to/data.json" />
+                <input class="inactive-csv" id="data" name="data" placeholder="https://path/to/public/data.json" />
 
                 <!-- Input: Separator (CSV only)  -->
                 <label class="inactive-json" for="separator">Separator¹:</label>
@@ -28,22 +35,39 @@
                 <div class="break-100"></div>
 
                 <!-- Buttons -->
-                <button class="inactive-csv" id="load">From URL</button>
+                <button class="inactive-csv" id="load" title="Click to read the content of the provided URL.">From URL</button>
                 <div class="inactive-csv break"></div>
-                <label for="fileupload" id="fileupload-label" class="btn">Upload file</label>
+                <label for="fileupload" id="fileupload-label" class="btn" title="Click to upload a local file.">Upload file</label>
             </div>
-            <p class="introduction-text inactive-csv" id="intro-json">Overwrite multiple text layers with real and coherent, yet randomized data. Simply load your JSON to set up some content. Then select a group or a frame and click “Fill with random entry”. The generator will pick a random entry but keeps the set together.</p>
-            <p class="introduction-text inactive-json" id="intro-csv">¹ Most .csv files are separated by <b>,</b> or by <b>;</b><br/>The default value is <b>,</b><br/><br/>Optionally you can pass a character that indicates when the character you've set to be your separator should be printed, for example when it's surrounded by <b>"</b>. So a number like 1,000 can be printed within a comma-separated .csv if you write "1,000" instead.<br/>The default value is <b>"</b></p>
-            <p class="msg error" id="error-msg"></p>
+
+            <!-- Break -->
+            <div class="break-100"></div>
+
+            <!-- Tabs -->
+            <div class="tabs-panel primary">
+                <div id="data-tabs" title="Click to select the tab. Click three times to rename the tab.">
+                    <span data-id="0" contenteditable="false" class="tab active">New Tab</span>
+                </div>
+                <span id="add" onclick="addTab()" title="Open a new tab. Right click on a to delete it."><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.5 4L6.5 9M9 6.5L4 6.5M12 6.5C12 9.53757 9.53757 12 6.5 12C3.46243 12 1 9.53757 1 6.5C1 3.46243 3.46243 1 6.5 1C9.53757 1 12 3.46243 12 6.5Z" stroke="#C4C4C4"/></svg></span>
+            </div>
+        </div>
+
+        <p class="container introduction-text inactive-csv" id="intro-json">Overwrite multiple text layers with real and coherent data. Upload your file, select a group or a frame and click “Random entry” or a specific dataset from the list you'll receive.</p>
+        <p class="container introduction-text inactive-json" id="intro-csv">¹ Most .csv files are separated by <b>,</b> or by <b>;</b><br/>The default value is <b>,</b><br/><br/>Optionally you can pass a character that indicates when the character you've set to be your separator should be printed, for example when it's surrounded by <b>"</b>. So a number like 1,000 can be printed within a comma-separated .csv if you write "1,000" instead.<br/>The default value is <b>"</b></p>
+    </div>
+
+    <div class="container">
+        <p class="msg error" id="error-msg"></p>
+
+        <!-- List of Items -->
+        <div id="data-entries" class="primary">
+            <ul data-id="0" class="entries active"></ul>
         </div>
     </div>
 
-    <!-- All entries -->
-    <ul id="entries" class="primary"></ul>
-
     <!-- Footer -->
     <div class="container-s action-panel">
-        <button id="fill" class="primary" disabled>Fill with random entry</button>
+        <button id="fill" class="primary" disabled title="Select a random entry from the active list.">Random entry</button>
         <button id="close">Close</button>
     </div>
 </body>
@@ -92,6 +116,10 @@
         -moz-osx-font-smoothing: grayscale;
         text-rendering: geometricPrecision;
     }
+    ul {
+        margin: 0;
+        padding: 0;
+    }
     .container {
         padding: 20px;
     }
@@ -104,6 +132,9 @@
     p b, p strong {
         color: #000;
         font-weight: 600;
+    }
+    p.container {
+        margin: 0;
     }
     p:empty,
     ul:empty {
@@ -186,14 +217,18 @@
         margin-left: auto;
     }
 
+    /* Options Panel */
+    .options-panel {
+        background-color: #f5f5f5;
+        border-bottom: 1px solid var(--border-gray);
+        padding-bottom: 0;
+    }
+
     /* File Selection Panel */
     .file-selection-panel {
         align-items: center;
         display: flex;
         flex-wrap: wrap;
-        padding: 6px 20px;
-        background-color: #f5f5f5;
-        border-bottom: 1px solid var(--border-gray);
     }
 
     .file-selection-panel > * {
@@ -221,25 +256,83 @@
         font-weight: 600;
     }
 
+    /* Tabs */
+    .tabs-panel {
+        flex-wrap: wrap;
+        -webkit-flex-wrap: nowrap;
+        position: relative;
+        top: 2px;
+    }
+
+    .tabs-panel #add {
+        display: inline-block;
+        position: relative;
+        padding: 7px 6px 7px;
+        margin-left: 3px;
+        top: 1px;
+        cursor: pointer;
+    }
+
+    .tabs-panel #add:hover path {
+        stroke: var(--accent-color, rgba(0,0,0,1));
+    }
+
+    #data-tabs {
+        display: inline-flex;
+        max-width: 210px;
+        overflow-x: auto;
+    }
+
+    #data-tabs [data-id] {
+        display: inline-block;
+        padding: 6px 0;
+        font-size: 12px;
+        font-weight: 400;
+        cursor: pointer;
+        opacity: .5;
+        border-bottom: 2px solid transparent;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    #data-tabs [data-id] + [data-id] {
+        margin-left: 13px;
+    }
+
+    #data-tabs [data-id]:hover {
+        opacity: .66;
+        border-bottom-color: var(--accent-color-fade, rgba(0,0,0,15));
+    }
+
+    #data-tabs [data-id].active {
+        font-weight: 600;
+        opacity: 1;
+        border-bottom-color: var(--accent-color, rgba(0,0,0,1));
+    }
+
     /* Entries List */
-    ul#entries {
-        margin: 0;
-        padding: 0 20px;
+    ul.entries {
         display: none;
     }
 
-    ul#entries li {
+    ul.entries.active {
+        display: block;
+    }
+
+    ul.entries li {
         display: block;
         margin: 4px 0;
         border-radius: 4px;
         background-color: var(--white, #fff);
+        overflow: hidden;
     }
 
-    ul#entries li * {
+    ul.entries li * {
         pointer-events: none;
     }
 
-    ul#entries li > .main {
+    ul.entries li > .main {
         display: flex;
         flex-wrap: nowrap;
         align-items: center;
@@ -249,13 +342,13 @@
         -webkit-user-select: none;
     }
 
-    ul#entries li .index {
+    ul.entries li .index {
         display: inline-block;
         width: 22px;
         color: rgba(0,0,0,0.5);
     }
 
-    ul#entries li .name {
+    ul.entries li .name {
         display: inline-block;
         width: calc(100% - 28px);
         padding-right: 16px;
@@ -268,7 +361,7 @@
         color: rgba(0,0,0,0.5);
     }
 
-    ul#entries li .arrow {
+    ul.entries li .arrow {
         display: none;
         position: absolute;
         right: 8px;
@@ -282,44 +375,44 @@
         cursor: pointer;
     }
 
-    ul#entries li.opened .arrow {
+    ul.entries li.opened .arrow {
         transform: scaleY(1) translateY(2px);
         -webkit-transform: scaleY(1) translateY(2px);
     }
 
     /* Entries Hover */
-    ul#entries li.opened .main {
+    ul.entries li.opened .main {
         border-top-left-radius: 4px;
         border-top-right-radius: 4px;
         background-color: var(--accent-color-fade, #e6e6e6);
     }
 
-    ul#entries li:hover,
-    ul#entries li.opened {
+    ul.entries li:hover,
+    ul.entries li.opened {
         background-color: var(--accent-color-fade, #e6e6e6);
         cursor: pointer;
     }
 
-    ul#entries li:hover .index,
-    ul#entries li.opened .index {
+    ul.entries li:hover .index,
+    ul.entries li.opened .index {
         color: var(--accent-color-light, rgba(0,0,0,0.75));
     }
 
-    ul#entries li:hover .name,
-    ul#entries li.opened .name {
+    ul.entries li:hover .name,
+    ul.entries li.opened .name {
         color: var(--accent-color, #000);
     }
 
-    ul#entries li:hover .arrow {
+    ul.entries li:hover .arrow {
         display: block;
     }
 
     /* Entries More Information */
-    ul#entries li [id^="more-information"] {
+    ul.entries li [id^="more-information"] {
         display: none;
     }
 
-    ul#entries li dl {
+    ul.entries li dl {
         display: -ms-grid;
         display: grid;
         grid-template-columns: 90px auto;
@@ -331,19 +424,19 @@
         border-top: 1px solid var(--accent-color-fade, rgba(0,0,0,0.25));
     }
 
-    ul#entries li dl dt {
+    ul.entries li dl dt {
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
     }
 
-    ul#entries li dl dd {
+    ul.entries li dl dd {
         margin: 0;
     }
 
     /* Messages */
     .msg {
-        margin: 18px 0 0;
+        margin: 0;
         padding: 6px 14px;
         border-radius: 4px;
         color: var(--accent-color, #000);
@@ -371,10 +464,10 @@
         padding: 5px 11px;
         font-size: 11px;
         font-weight: 500;
-        border: 0;
         border-radius: 4px;
         margin-left: 16px;
         background-color: var(--middle-gray, #eeeeee);
+        border: 1px solid var(--border-gray, #cdcdcd);
     }
 
     #fileupload, input[type="radio"] {
@@ -388,6 +481,7 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
+        opacity: 1;
     }
 
     .json--active .inactive-json,
@@ -402,6 +496,8 @@
 
 <script>
     const errorMsg = document.getElementById('error-msg');
+    let activeTabIndex = 0;
+    let createdTabs = 0;
 
     document.getElementById('fileupload').onchange = () => {
         const element = document.getElementById('fileupload');
@@ -423,10 +519,10 @@
                     // Read CSV, check for separator type
                     const data = readCSV(e, returnValueFromID('separator', ','), returnValueFromID('ignore', '"'));
 
-                    acceptAndSendData(parent, data);
+                    acceptAndSendData(parent, data, activeTabIndex);
 
                     // Rename button
-                    label.textContent = files[0].name;
+                    document.querySelector('#data-tabs [data-id="' + activeTabIndex + '"]').textContent = files[0].name.split('.')[0];
                 } catch(error) {
                     if (error instanceof SyntaxError) {
                         errorMsg.innerHTML = 'The file could not be loaded. The file seems to have syntax errors.';
@@ -441,10 +537,10 @@
                 try {
                     const data = JSON.parse(e.target.result);
 
-                    acceptAndSendData(parent, data);
+                    acceptAndSendData(parent, data, activeTabIndex);
 
                     // Rename button
-                    label.textContent = files[0].name;
+                    document.querySelector('#data-tabs [data-id="' + activeTabIndex + '"]').textContent = files[0].name.split('.')[0];
                 } catch(error) {
                     if (error instanceof SyntaxError) {
                         errorMsg.innerHTML = 'The file could not be loaded. The file seems to have syntax errors.';
@@ -471,7 +567,7 @@
                 if (data.success === false) {
                     errorMsg.innerHTML = 'You have no permission to fetch this data. Please provide an URL that\'s publicly available.';
                 } else {
-                    acceptAndSendData(parent, data);
+                    acceptAndSendData(parent, data, activeTabIndex);
                 }
             })
             .catch(error => {
@@ -487,24 +583,71 @@
         parent.postMessage({ pluginMessage: { type: 'fill' } }, '*')
     };
 
-    // get specific entry
-    document.getElementById('entries').addEventListener('click', function(e) {
-        if (e.target.matches('li.data-entry')) {
+    /*
+     * Data functions
+     * -----------------------
+     */
 
-            // get correct entry by comparing indexes
-            let index = e.target.attributes.index.textContent;
+    function acceptAndSendData(parent, data, activeTabIndex) {
 
-            // fill in entry
-            parent.postMessage({ pluginMessage: { type: 'fill-specific', index } }, '*')
+        // post data to ui
+        parent.postMessage({ pluginMessage: { type: 'load', data, activeTabIndex } }, '*');
+
+        // remove all entries from list
+        document.querySelector('.entries[data-id="' + activeTabIndex + '"]').innerHTML = '';
+
+        // creates for each entry a direct link in list
+        createEntries(parent, data);
+
+        // initiate action
+        document.getElementById('intro-json').style.display = 'none';
+        document.getElementById('intro-csv').style.display = 'none';
+        document.getElementById('fill').removeAttribute('disabled');
+        errorMsg.innerHTML = '';
+
+        // post message to figma
+        parent.postMessage({ pluginMessage: { type: 'success', data } }, '*');
+    }
+
+    function returnValueFromID(id, fallback = ',') {
+        const input = document.getElementById(id);
+        return (input.value !== '') ? input.value : fallback;
+    }
+
+    function readCSV(e, separator = ',', ignore = '"') {
+        var reg = new RegExp('((?:[^' + separator + '' + ignore + ']+|' + ignore + '[^' + ignore + ']*' + ignore + ')+)', 'g');
+
+        const lines = e.target.result.split(/\r\n|\n/).map(function(e) {
+            return e.match(reg)
+        });
+
+        let data = [];
+        let keys = lines[0];
+
+        for (var i = 1; i <= (lines.length - 1); i++) {
+
+            var obj = {};
+
+            for (var a = 0; a <= lines[i].length; a++) {
+                const key = keys[a];
+                const value = lines[i][a];
+
+                if (key !== undefined && value !== undefined) {
+                    obj[key] = value;
+                }
+
+            }
+
+            data.push(obj);
         }
-    });
 
-    // open more information accordion of specific entry
-    document.getElementById('entries').addEventListener('click', function(e) {
-        if (e.target.matches('.arrow')) {
-            toggleMoreInformation(e.target, e.target.attributes.index.textContent);
-        }
-    });
+        return data;
+    }
+
+    /*
+     * Type selection functions
+     * -----------------------
+     */
 
     // switch file selection
     const main      = document.getElementById('main');
@@ -528,31 +671,155 @@
     });
 
     /*
-     * Functions
+     * Tab functions
      * -----------------------
      */
 
-    function acceptAndSendData(parent, data) {
+    const tabsHolder = document.querySelector('#data-tabs');
+    const entriesHolder = document.querySelector('#data-entries');
 
-        // post data to ui
-        parent.postMessage({ pluginMessage: { type: 'load', data } }, '*');
+    let tabs = document.querySelectorAll('#data-tabs [data-id]');
 
-        // remove all entries from list
-        document.getElementById('entries').innerHTML = '';
+    // change tab
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('.tab[data-id]')) {
+            toggleTab(e);
+        }
+    });
 
-        // creates for each entry a direct link in list
-        createEntries(parent, data);
+    // enter rewritting mode
+    document.addEventListener('dblclick', function(e) {
+        if (e.target.matches('.tab[data-id]')) {
+            rewriteTab(e, true);
+        }
+    });
 
-        // initiate action
-        document.getElementById('entries').style.display = 'block';
-        document.getElementById('intro-json').style.display = 'none';
-        document.getElementById('intro-csv').style.display = 'none';
-        document.getElementById('fill').disabled = false;
-        errorMsg.innerHTML = '';
+    // exit rewriting mode when pressing enter
+    document.addEventListener('keydown', function(e) {
+        if (e.target.matches('.tab[data-id]')) {
+            if (e.keyCode === 13) {
+                e.preventDefault();
 
-        // post message to figma
-        parent.postMessage({ pluginMessage: { type: 'success', data } }, '*');
+                if (e.target.matches('[contenteditable="true"]')) {
+                    rewriteTab(e, false);
+                }
+            }
+            if (e.keyCode === 27) {
+                rewriteTab(e, false);
+            }
+        }
+    });
+
+    document.addEventListener('contextmenu', function(e) {
+        if (e.target.matches('.tab[data-id]')) {
+            if (tabs.length <= 1) {
+                parent.postMessage({pluginMessage: {type: 'warning', data: 'lastTab'}}, '*');
+            } else {
+                deleteTab(e);
+            }
+
+            reindexTabs();
+        }
+    });
+
+    function toggleTab(e) {
+        if (!e.target.classList.contains('active')) {
+            activeTabIndex = parseInt(e.target.attributes['data-id'].textContent);
+
+            // rewrite active tab
+            for (i = 0; i < tabs.length; ++i) {
+                tabs[i].classList.remove('active');
+                entriesLists[i].classList.remove('active');
+
+                if (tabs[i].matches('[data-id="' + activeTabIndex + '"]')) {
+                    tabs[i].classList.add('active');
+                }
+
+                if (entriesLists[i].matches('[data-id="' + activeTabIndex + '"]')) {
+                    entriesLists[i].classList.add('active');
+
+                    if (entriesLists[i].children.length < 1) {
+                        document.getElementById('fill').setAttribute('disabled', 'disabled');
+                    } else {
+                        document.getElementById('fill').removeAttribute('disabled');
+                    }
+                }
+            }
+
+            rewriteTab(e, false);
+
+            parent.postMessage({ pluginMessage: { type: 'tab-changed', activeTabIndex } }, '*');
+        }
     }
+
+    function rewriteTab(e, type) {
+        e.target.attributes['contenteditable'].textContent = type;
+    }
+
+    function reindexTabs() {
+        tabs = document.querySelectorAll('#data-tabs [data-id]');
+        entriesLists = document.querySelectorAll('#data-entries [data-id]');
+    }
+
+    function addTab() {
+        console.log({activeTabIndex}, {createdTabs});
+        createdTabs++;
+
+        let newTab = document.createElement('span');
+
+        newTab.setAttribute('data-id', createdTabs);
+        newTab.setAttribute('contenteditable', 'false');
+        newTab.setAttribute('class', 'tab');
+        newTab.innerHTML = 'New Tab';
+
+        let newEntry = document.createElement('ul');
+        newEntry.setAttribute('data-id', createdTabs);
+        newEntry.setAttribute('class', 'entries');
+
+        tabsHolder.appendChild(newTab);
+        entriesHolder.appendChild(newEntry);
+
+        reindexTabs();
+    }
+
+    function deleteTab(e) {
+        const clickedTabIndex = parseInt(e.target.attributes['data-id'].textContent);
+
+        for (i = 0; i < tabs.length; ++i) {
+            if (tabs[i].matches('[data-id="' + clickedTabIndex + '"]')) {
+                tabs[i].remove();
+            }
+
+            if (entriesLists[i].matches('[data-id="' + clickedTabIndex + '"]')) {
+                entriesLists[i].remove();
+            }
+        }
+
+        parent.postMessage({pluginMessage: {type: 'tab-deleted', clickedTabIndex}}, '*');
+    }
+
+    /*
+     * Entries functions
+     * -----------------------
+     */
+
+    let entriesLists = document.querySelectorAll('#data-entries [data-id]');
+
+    // get specific entry
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('li.data-entry')) {
+
+            // get correct entry by comparing indexes
+            let index = e.target.attributes.index.textContent;
+
+            // fill in entry
+            parent.postMessage({pluginMessage: {type: 'fill-specific', index}}, '*')
+        }
+
+        if (e.target.matches('.arrow')) {
+            toggleMoreInformation(e.target, e.target.attributes.index.textContent);
+        }
+    });
 
     function createEntries(parent, data) {
         let i = 0;
@@ -616,14 +883,14 @@
                 li.innerHTML =
                     '<div class="main">' +
                     '<span class="index">' + (i + 1) + '.</span>' +
-                        '<span class="name">' + name + '</span>' +
-                        '<span class="arrow" index="' + i + '"><svg width="11" height="12" viewBox="0 0 11 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path opacity="0.33" d="M9.8995 6.24264L5.65686 2L1.41422 6.24265" stroke="#282c84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
+                    '<span class="name">' + name + '</span>' +
+                    '<span class="arrow" index="' + i + '"><svg width="11" height="12" viewBox="0 0 11 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path opacity="0.33" d="M9.8995 6.24264L5.65686 2L1.41422 6.24265" stroke="#282c84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
                     '</div>' +
-                    '<div id="more-information-' + i + '"></div>';
+                    '<div id="more-information-' + activeTabIndex + '-' + i + '"></div>';
 
                 // append li
-                document.getElementById('entries').appendChild(li);
-                document.getElementById('more-information-' + i).appendChild(dl);
+                document.querySelector('.entries[data-id="' + activeTabIndex + '"]').appendChild(li);
+                document.getElementById('more-information-' + activeTabIndex + '-' + i).appendChild(dl);
                 i++;
             }
         }
@@ -631,11 +898,11 @@
 
     function toggleMoreInformation(el, index) {
         if (el.classList.contains('opened')) {
-            document.getElementById('more-information-' + index).style.display = 'none';
+            document.getElementById('more-information-' + activeTabIndex + '-' + index).style.display = 'none';
             el.closest('li').classList.remove('opened');
             el.classList.remove('opened');
         } else {
-            document.getElementById('more-information-' + index).style.display = 'block';
+            document.getElementById('more-information-' + activeTabIndex + '-' + index).style.display = 'block';
             el.closest('li').classList.add('opened');
             el.classList.add('opened');
         }
