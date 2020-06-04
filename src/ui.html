@@ -101,7 +101,7 @@
     }
 
     * {
-        font-family: 'Inter UI', sans-serif;
+        font-family: 'Inter', sans-serif;
         box-sizing: border-box;
     }
     body {
@@ -906,41 +906,6 @@
             el.closest('li').classList.add('opened');
             el.classList.add('opened');
         }
-    }
-
-    function returnValueFromID(id, fallback = ',') {
-        const input = document.getElementById(id);
-        return (input.value !== '') ? input.value : fallback;
-    }
-
-    function readCSV(e, separator = ',', ignore = '"') {
-        var reg = new RegExp('((?:[^' + separator + '' + ignore + ']+|' + ignore + '[^' + ignore + ']*' + ignore + ')+)', 'g');
-
-        const lines = e.target.result.split(/\r\n|\n/).map(function(e) {
-            return e.match(reg)
-        });
-
-        let data = [];
-        let keys = lines[0];
-
-        for (var i = 1; i <= (lines.length - 1); i++) {
-
-            var obj = {};
-
-            for (var a = 0; a <= lines[i].length; a++) {
-                const key = keys[a];
-                const value = lines[i][a];
-
-                if (key !== undefined && value !== undefined) {
-                    obj[key] = value;
-                }
-
-            }
-
-            data.push(obj);
-        }
-
-        return data;
     }
 
 

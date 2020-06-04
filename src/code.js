@@ -100,9 +100,9 @@ figma.ui.onmessage = msg => {
                                     // Send the raw bytes of the file to the worker.
                                     // todo
                                     /*
-                                    const newPaint = JSON.parse(JSON.stringify(paint))
-                                    newPaint.imageHash = figma.createImage(newBytes).hash
-                                    newFills.push(newPaint)
+                                    const newPaint = JSON.parse(JSON.stringify(paint));
+                                    newPaint.imageHash = figma.createImage(newBytes).hash;
+                                    newFills.push(newPaint);
                                     */
                                 }
                             }

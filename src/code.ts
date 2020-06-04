@@ -119,9 +119,9 @@ figma.ui.onmessage = msg => {
 
                 // todo
                 /*
-                const newPaint = JSON.parse(JSON.stringify(paint))
-                newPaint.imageHash = figma.createImage(newBytes).hash
-                newFills.push(newPaint)
+                const newPaint = JSON.parse(JSON.stringify(paint));
+                newPaint.imageHash = figma.createImage(newBytes).hash;
+                newFills.push(newPaint);
                 */
               }
             }
