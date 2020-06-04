@@ -1,4 +1,4 @@
-![figma-json-to-content-image](https://lucasdietrich.de/github/repositories/figma-json-to-content/img/banner-github.jpg)
+![figma-json-to-content-image](http://dev.lucasdietrich.de/lucasdietrich/plugins/figma/json-to-content/figma-json-to-content-image.jpg)
 
 # Figma Plugin: JSON To Content
 Easily map your data and layers together by using the same name. Either select specific entries from your overview or shuffle through them for a randomised dataset
