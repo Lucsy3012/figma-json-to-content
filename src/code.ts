@@ -17,6 +17,11 @@ figma.ui.onmessage = msg => {
     activeTabIndex = msg.activeTabIndex;
     datasets[activeTabIndex] = data;
 
+    // if single object, wrap in array
+    if (datasets[activeTabIndex].length === undefined) {
+      datasets[activeTabIndex] = [data];
+    }
+
     if (msg.data !== []) {
 
       // Load every text style in use once
@@ -67,6 +72,9 @@ figma.ui.onmessage = msg => {
     notifyWarning('emptyObject', 'I have discovered some empty objects and skipped those.');
 
     // Empty object notification
+    notifyWarning('nonArray', 'The input data was non-iterable. JSON To Content works best with an array of objects.');
+
+    // Last tab notification
     notifyWarning('lastTab', 'You may not delete the last available tab.');
   }
 

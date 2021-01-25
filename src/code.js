@@ -1,8 +1,9 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -21,6 +22,10 @@ figma.ui.onmessage = msg => {
         data = msg.data;
         activeTabIndex = msg.activeTabIndex;
         datasets[activeTabIndex] = data;
+        // if single object, wrap in array
+        if (datasets[activeTabIndex].length === undefined) {
+            datasets[activeTabIndex] = [data];
+        }
         if (msg.data !== []) {
             // Load every text style in use once
             const textNodes = figma.root.findAll(node => node.type === "TEXT");
@@ -60,6 +65,8 @@ figma.ui.onmessage = msg => {
         // Empty object notification
         notifyWarning('emptyObject', 'I have discovered some empty objects and skipped those.');
         // Empty object notification
+        notifyWarning('nonArray', 'The input data was non-iterable. JSON To Content works best with an array of objects.');
+        // Last tab notification
         notifyWarning('lastTab', 'You may not delete the last available tab.');
     }
     function loadFontsFrom(layer) {
