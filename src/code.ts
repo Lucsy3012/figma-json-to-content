@@ -17,6 +17,12 @@ figma.ui.onmessage = msg => {
     activeTabIndex = msg.activeTabIndex;
     datasets[activeTabIndex] = data;
 
+    if (datasets[activeTabIndex].length === undefined) {
+      datasets[activeTabIndex] = [data];
+    }
+
+    console.log(datasets[activeTabIndex]);
+
     if (msg.data !== []) {
 
       // Load every text style in use once
@@ -62,6 +68,9 @@ figma.ui.onmessage = msg => {
 
   // Error
   if (msg.type === 'warning') {
+
+    // Empty object notification
+    notifyWarning('nonArray', 'Found single object. JSON -> Content works best with an array of object.');
 
     // Empty object notification
     notifyWarning('emptyObject', 'I have discovered some empty objects and skipped those.');

@@ -1,8 +1,9 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -21,6 +22,10 @@ figma.ui.onmessage = msg => {
         data = msg.data;
         activeTabIndex = msg.activeTabIndex;
         datasets[activeTabIndex] = data;
+        if (datasets[activeTabIndex].length === undefined) {
+            datasets[activeTabIndex] = [data];
+        }
+        console.log(datasets[activeTabIndex]);
         if (msg.data !== []) {
             // Load every text style in use once
             const textNodes = figma.root.findAll(node => node.type === "TEXT");
@@ -57,6 +62,8 @@ figma.ui.onmessage = msg => {
     }
     // Error
     if (msg.type === 'warning') {
+        // Empty object notification
+        notifyWarning('nonArray', 'Found single object. JSON -> Content works best with an array of object.');
         // Empty object notification
         notifyWarning('emptyObject', 'I have discovered some empty objects and skipped those.');
         // Empty object notification

@@ -45,10 +45,10 @@
 
             <!-- Tabs -->
             <div class="tabs-panel primary">
-                <div id="data-tabs" title="Click to select the tab. Click three times to rename the tab.">
+                <div id="data-tabs" title="Click to select the tab. Click three times to rename the tab. Right-click to delete remove tab.">
                     <span data-id="0" contenteditable="false" class="tab active">New Tab</span>
                 </div>
-                <span id="add" onclick="addTab()" title="Open a new tab. Right click on a to delete it."><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.5 4L6.5 9M9 6.5L4 6.5M12 6.5C12 9.53757 9.53757 12 6.5 12C3.46243 12 1 9.53757 1 6.5C1 3.46243 3.46243 1 6.5 1C9.53757 1 12 3.46243 12 6.5Z" stroke="#C4C4C4"/></svg></span>
+                <span id="add" onclick="addTab()" title="Open a new tab. Right-click on a tab to remove it."><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.5 4L6.5 9M9 6.5L4 6.5M12 6.5C12 9.53757 9.53757 12 6.5 12C3.46243 12 1 9.53757 1 6.5C1 3.46243 3.46243 1 6.5 1C9.53757 1 12 3.46243 12 6.5Z" stroke="#C4C4C4"/></svg></span>
             </div>
         </div>
 
@@ -824,10 +824,42 @@
     function createEntries(parent, data) {
         let i = 0;
         let errorCount = 0;
+        let _singleObject = false;
+
+        console.log(data);
 
         // WARNING : if not an array, create an array
         if (data.length === undefined) {
             data = [data];
+            _singleObject = true;
+        }
+
+        // if initial data is non array
+        if (_singleObject) {
+            parent.postMessage({ pluginMessage: { type: 'warning', data: 'nonArray' } }, '*');
+
+            // iterate over data/json entries (only one)
+            for (let entry of data) {
+
+                // each value
+                for (let value of Object.keys(entry)) {
+                    let li = document.createElement('li');
+                    li.classList.add('data-entry');
+                    li.setAttribute('index', i);
+                    li.setAttribute('title', entry[value]);
+
+                    // create li
+                    li.innerHTML =
+                        '<div class="main">' +
+                        '<span class="index">' + (i + 1) + '.</span>' +
+                        '<span class="name">' + value + '</span>' +
+                        '</div>';
+
+                    // append li
+                    document.querySelector('.entries[data-id="' + activeTabIndex + '"]').appendChild(li);
+                    i++;
+                }
+            }
         }
 
         // iterate over data/json entries
