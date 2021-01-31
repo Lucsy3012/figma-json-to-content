@@ -49,12 +49,17 @@ figma.ui.onmessage = msg => {
     // Fill in random entry
     if (msg.type === 'fill') {
         getData();
-        selectData(random);
+        selectData(random, false);
+    }
+    // Iterate over random entries
+    if (msg.type === 'iterate') {
+        getData();
+        selectData(random, true);
     }
     // Fill in specific entry
     if (msg.type === 'fill-specific') {
         getData();
-        selectData(msg.index);
+        selectData(msg.index, false);
     }
     // Close
     if (msg.type === 'close') {
@@ -83,8 +88,12 @@ figma.ui.onmessage = msg => {
         let len = datasets[activeTabIndex].length;
         random = Math.floor(Math.random() * len);
     }
-    function selectData(index) {
+    function selectData(index, iterate) {
         return __awaiter(this, void 0, void 0, function* () {
+            // For iteration
+            const length = datasets[activeTabIndex].length;
+            let usedIndexes = [index];
+            let usedKeys = [];
             // Get selection
             for (const node of figma.currentPage.selection) {
                 // If selection is single TextNode
@@ -103,10 +112,29 @@ figma.ui.onmessage = msg => {
                         // Texts
                         // Find elements in selection that match any key of data
                         const textLayers = node.findAll(node => node.name === key && node.type === 'TEXT');
+                        // Rewrite layer text with value of each key but go the next index if key doubles
+                        if (iterate === true) {
+                            for (const layer of textLayers) {
+                                yield loadFontsFrom(layer);
+                                // If duplicates
+                                if (usedKeys.includes(key)) {
+                                    index++;
+                                    usedIndexes.push(index);
+                                    usedKeys = [];
+                                }
+                                // If index reached its end
+                                index = (index >= length) ? 0 : index;
+                                layer.characters = datasets[activeTabIndex][index][key].toString();
+                                // Add key to used keys
+                                usedKeys.push(key);
+                            }
+                        }
                         // Rewrite layer text with value of each key
-                        for (const layer of textLayers) {
-                            yield loadFontsFrom(layer);
-                            layer.characters = datasets[activeTabIndex][index][key].toString();
+                        else {
+                            for (const layer of textLayers) {
+                                yield loadFontsFrom(layer);
+                                layer.characters = datasets[activeTabIndex][index][key].toString();
+                            }
                         }
                     }
                 }
