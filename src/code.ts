@@ -51,13 +51,19 @@ figma.ui.onmessage = msg => {
   // Fill in random entry
   if (msg.type === 'fill') {
     getData();
-    selectData(random);
+    selectData(random, false);
+  }
+
+  // Iterate over random entries
+  if (msg.type === 'iterate') {
+    getData();
+    selectData(random, true);
   }
 
   // Fill in specific entry
   if (msg.type === 'fill-specific') {
     getData();
-    selectData(msg.index);
+    selectData(msg.index, false);
   }
 
   // Close
@@ -96,7 +102,12 @@ figma.ui.onmessage = msg => {
     random = Math.floor(Math.random() * len);
   }
 
-  async function selectData(index) {
+  async function selectData(index, iterate) {
+
+    // For iteration
+    const length = datasets[activeTabIndex].length;
+    let usedIndexes = [index];
+    let usedKeys = [];
 
     // Get selection
     for (const node of figma.currentPage.selection) {
@@ -122,10 +133,35 @@ figma.ui.onmessage = msg => {
           // Find elements in selection that match any key of data
           const textLayers = node.findAll(node => node.name === key && node.type === 'TEXT');
 
+          // Rewrite layer text with value of each key but go the next index if key doubles
+          if (iterate === true) {
+            for (const layer of textLayers) {
+              await loadFontsFrom(layer);
+
+              // If duplicates
+              if (usedKeys.includes(key)) {
+                index++;
+                usedIndexes.push(index);
+                usedKeys = [];
+              }
+
+              // If index reached its end
+              index = (index >= length) ? 0 : index;
+
+              layer.characters = datasets[activeTabIndex][index][key].toString();
+
+              // Add key to used keys
+              usedKeys.push(key);
+            }
+          }
+
           // Rewrite layer text with value of each key
-          for (const layer of textLayers) {
-            await loadFontsFrom(layer);
-            layer.characters = datasets[activeTabIndex][index][key].toString();
+          else {
+            for (const layer of textLayers) {
+              await loadFontsFrom(layer);
+
+              layer.characters = datasets[activeTabIndex][index][key].toString();
+            }
           }
         }
       }

@@ -52,7 +52,7 @@
             </div>
         </div>
 
-        <p class="container introduction-text inactive-csv" id="intro-json">Overwrite multiple text layers with real and coherent data. Upload your file, select a group or a frame and click “Random entry” or a specific dataset from the list you'll receive.</p>
+        <p class="container introduction-text inactive-csv" id="intro-json">Overwrite multiple text layers with real and coherent data. Upload your file, select a group or a frame and click “Random” or a specific dataset from the list you'll receive.<br/><br/><b>New:</b> Click “Iterate” to apply multiple entries of your list to your selection. The next entry will be used as soon as the same data would be applied a second time.</p>
         <p class="container introduction-text inactive-json" id="intro-csv">¹ Most .csv files are separated by <b>,</b> or by <b>;</b><br/>The default value is <b>,</b><br/><br/>Optionally you can pass a character that indicates when the character you've set to be your separator should be printed, for example when it's surrounded by <b>"</b>. So a number like 1,000 can be printed within a comma-separated .csv if you write "1,000" instead.<br/>The default value is <b>"</b></p>
     </div>
 
@@ -67,7 +67,8 @@
 
     <!-- Footer -->
     <div class="container-s action-panel">
-        <button id="fill" class="primary" disabled title="Select a random entry from the active list.">Random entry</button>
+        <button id="fill" class="primary" disabled title="Selects a random entry from the active list.">Random</button>
+        <button id="iterate" class="primary" disabled title="Selects a random entry from the active list and iterates to the entry as soon as a key duplicates.">Iterate</button>
         <button id="close">Close</button>
     </div>
 </body>
@@ -212,6 +213,9 @@
         bottom: 0;
         left: 0;
         right: 0;
+    }
+    .action-panel button#iterate {
+        margin-left: 10px;
     }
     .action-panel button#close {
         margin-left: auto;
@@ -583,6 +587,10 @@
         parent.postMessage({ pluginMessage: { type: 'fill' } }, '*')
     };
 
+    document.getElementById('iterate').onclick = () => {
+        parent.postMessage({ pluginMessage: { type: 'iterate' } }, '*')
+    };
+
     /*
      * Data functions
      * -----------------------
@@ -603,6 +611,7 @@
         document.getElementById('intro-json').style.display = 'none';
         document.getElementById('intro-csv').style.display = 'none';
         document.getElementById('fill').removeAttribute('disabled');
+        document.getElementById('iterate').removeAttribute('disabled');
         errorMsg.innerHTML = '';
 
         // post message to figma
@@ -740,8 +749,10 @@
 
                     if (entriesLists[i].children.length < 1) {
                         document.getElementById('fill').setAttribute('disabled', 'disabled');
+                        document.getElementById('iterate').setAttribute('disabled', 'disabled');
                     } else {
                         document.getElementById('fill').removeAttribute('disabled');
+                        document.getElementById('iterate').removeAttribute('disabled');
                     }
                 }
             }

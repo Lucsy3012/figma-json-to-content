@@ -15,10 +15,14 @@ Overwrite multiple text layers within your selection and any data that’s attac
 #### Choose between specific or randomised data
 When you have imported your data, the plugin will print a list with every entry that’s in your file. Click on an entry if you need specific data from that set.
 
-#### (New) Multiple datasets via tab menu
+#### Multiple datasets via tab menu
 Push your productivity even more with the new tab menu feature. It's now possible to set up multiple datasets without switching between files.
+
+#### (New) Iterate over random entries
+Iterate over multiple entries of your list to your selection. The next entry will be used as soon as the same data would be applied a second time.
 
 #### Future plans:
 * Implement the ability to also link images
-* Create and save multiple tabs with different data (done)
-* Upload .csv files (done)
+* Create and save multiple tabs with different data (done with 1.5)
+* Create and save multiple tabs with different data (done with 1.4)
+* Upload .csv files (done with 1.3)
