@@ -1,0 +1,164 @@
+[
+  {
+    "sSong": "SOHO",
+    "sArtists": "Jaden",
+    "sAlbum": "The Sunset Tapes: A Cool Tape Story",
+    "sDuration": "03:28",
+    "sRating": 5,
+    "sExplicit": "explicit",
+    "sRelease": 2018
+  },
+  {
+    "sSong": "Losses",
+    "sArtists": "Drake",
+    "sAlbum": "Dark Lane Demo Tapes",
+    "sDuration": "04:31",
+    "sRating": 4,
+    "sExplicit": "explicit",
+    "sRelease": 2020
+  },
+  {
+    "sSong": "Fields",
+    "sArtists": "Giveon",
+    "sAlbum": "Fields",
+    "sDuration": "03:40",
+    "sRating": 4,
+    "sExplicit": null,
+    "sRelease": 2018
+  },
+  {
+    "sSong": "Venice Bitch",
+    "sArtists": "Lana Del Ray",
+    "sAlbum": "Norman Fucking Rockwell!",
+    "sDuration": "09:37",
+    "sRating": 4,
+    "sExplicit": "explicit",
+    "sRelease": 2019
+  },
+  {
+    "sSong": "Levitating",
+    "sArtists": "Dua Lipa",
+    "sAlbum": "Future Nostalgia",
+    "sDuration": "03:24",
+    "sRating": 5,
+    "sExplicit": null,
+    "sRelease": 2020
+  },
+  {
+    "sSong": "COPYCAT",
+    "sArtists": "Billie Eilish",
+    "sAlbum": "dont smile at me",
+    "sDuration": "03:15",
+    "sRating": 3,
+    "sExplicit": null,
+    "sRelease": 2017
+  },
+  {
+    "sSong": "Resonance",
+    "sArtists": "Home",
+    "sAlbum": "Odyssey",
+    "sDuration": "03:33",
+    "sRating": 5,
+    "sExplicit": null,
+    "sRelease": 2014
+  },
+  {
+    "sSong": "Winter",
+    "sArtists": "Daughter",
+    "sAlbum": "If You Leave",
+    "sDuration": "04:43",
+    "sRating": 4,
+    "sExplicit": null,
+    "sRelease": 2013
+  },
+  {
+    "sSong": "Fake Happy",
+    "sArtists": "Paramore",
+    "sAlbum": "After Laughter",
+    "sDuration": "03:56",
+    "sRating": 3,
+    "sExplicit": null,
+    "sRelease": 2017
+  },
+  {
+    "sSong": "Dust",
+    "sArtists": "M|O|O|N",
+    "sAlbum": "Particles",
+    "sDuration": "05:02",
+    "sRating": 5,
+    "sExplicit": null,
+    "sRelease": 2012
+  },
+  {
+    "sSong": "Amazing",
+    "sArtists": "Kanye West, Jeezy",
+    "sAlbum": "808s & Heartbreak",
+    "sDuration": "03:58",
+    "sRating": 3,
+    "sExplicit": null,
+    "sRelease": 2008
+  },
+  {
+    "sSong": "Breaking the Habit",
+    "sArtists": "Linkin Park",
+    "sAlbum": "Meteora",
+    "sDuration": "03:17",
+    "sRating": 4,
+    "sExplicit": null,
+    "sRelease": 2003
+  },
+  {
+    "sSong": "Thriller",
+    "sArtists": "Michael Jackson",
+    "sAlbum": "Thriller",
+    "sDuration": "05:58",
+    "sRating": 4,
+    "sExplicit": null,
+    "sRelease": 1982
+  },
+  {
+    "sSong": "Stuck In Traffic On Mars",
+    "sArtists": "Purrple Cat, Chill Select",
+    "sAlbum": "Fam Episode 01",
+    "sDuration": "02:27",
+    "sRating": 4,
+    "sExplicit": null,
+    "sRelease": 2019
+  },
+  {
+    "sSong": "Soundtrack 2 My Life",
+    "sArtists": "Kid Cudi",
+    "sAlbum": "Man On The Moon: The End Of Day",
+    "sDuration": "03:56",
+    "sRating": 4,
+    "sExplicit": "explicit",
+    "sRelease": 2009
+  },
+  {
+    "sSong": "Inner City Blues (Make Me Wanna Holler)",
+    "sArtists": "Marvin Gaye",
+    "sAlbum": "What's Going On",
+    "sDuration": "05:32",
+    "sRating": 5,
+    "sExplicit": null,
+    "sRelease": 1971
+  },
+  {
+    "sSong": "Nights",
+    "sArtists": "Frank Ocean",
+    "sAlbum": "Blonde",
+    "sDuration": "05:07",
+    "sRating": 5,
+    "sExplicit": "explicit",
+    "sRelease": 2016
+  },
+  {
+    "sSong": "YOSEMITE",
+    "sArtists": "Travis Scott",
+    "sAlbum": "ASTROWORLD",
+    "sDuration": "02:30",
+    "sRating": 4,
+    "sExplicit": "explicit",
+    "sRelease": 2018
+  }
+]
