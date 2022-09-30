@@ -18,8 +18,11 @@ When you have imported your data, the plugin will print a list with every entry 
 #### Multiple datasets via tab menu
 Push your productivity even more with the new tab menu feature. It's now possible to set up multiple datasets without switching between files.
 
-#### (New) Iterate over random entries
+#### Iterate over random entries
 Iterate over multiple entries of your list to your selection. The next entry will be used as soon as the same data would be applied a second time.
+
+#### (New) Use multi-layered JSON files
+You can now utilize the power of layered JSON files if needed. This is a much more common way of writing JSON and allows for more flexibility. Files which have worked before will work as expected. 
 
 #### Future plans:
 * Implement the ability to also link images

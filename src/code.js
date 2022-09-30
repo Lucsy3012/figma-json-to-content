@@ -8,12 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 // This shows the HTML page in "ui.html".
-figma.showUI(__html__, { height: 438 });
+figma.showUI(__html__, { width: 320, height: 512 });
 // Create empty data
 let datasets = {};
 let data = [];
 let activeTabIndex = 0;
-let keys;
+let keys = [];
+let nestedObjectName = "";
+let depthSeparator = '-';
 let random;
 figma.ui.onmessage = msg => {
     // Load data
@@ -22,6 +24,7 @@ figma.ui.onmessage = msg => {
         data = msg.data;
         activeTabIndex = msg.activeTabIndex;
         datasets[activeTabIndex] = data;
+        depthSeparator = msg.depthSeparator;
         // if single object, wrap in array
         if (datasets[activeTabIndex].length === undefined) {
             datasets[activeTabIndex] = [data];
@@ -37,6 +40,10 @@ figma.ui.onmessage = msg => {
     // Success
     if (msg.type === 'success') {
         figma.notify('Data has been loaded successfully. Have fun!');
+    }
+    // Separator changed
+    if (msg.type === 'depth-separator-changed') {
+        depthSeparator = msg.depthSeparator;
     }
     // Tab changed
     if (msg.type === 'tab-changed') {
@@ -79,7 +86,10 @@ figma.ui.onmessage = msg => {
             resolve(figma.loadFontAsync({ family: layer.fontName.family, style: layer.fontName.style }));
         });
     }
+    // Data functions
     function getData() {
+        // Reset values
+        keys = [];
         // Get keys of data after import
         for (const dataNodes of datasets[activeTabIndex]) {
             keys = Object.keys(dataNodes);
@@ -98,10 +108,26 @@ figma.ui.onmessage = msg => {
             for (const node of figma.currentPage.selection) {
                 // If selection is single TextNode
                 if (node.type === "TEXT") {
-                    for (const key of keys) {
-                        yield loadFontsFrom(node);
-                        if (node.name === key) {
-                            node.characters = data[index][key].toString();
+                    yield loadFontsFrom(node);
+                    /**
+                     * Replace Function Text based on key in object
+                     * 1. Direct hit
+                     * 2. Virtual hit (based on object structure)
+                     */
+                    const _isAvailable = keys.includes(node.name);
+                    const _isSet = typeof data[index][node.name] !== undefined;
+                    const _isNoObject = typeof data[index][node.name] !== 'object';
+                    const _separatorInName = node.name.indexOf(depthSeparator) >= 0;
+                    // 1. Direct hit (doesn't matter of separators)
+                    if (_isAvailable && _isSet && _isNoObject) {
+                        node.characters = data[index][node.name].toString();
+                        // 3. First Level hit (separator is only virtual)
+                    }
+                    else if (_separatorInName) {
+                        let separatorElements = node.name.split(depthSeparator);
+                        let firstSeparatorElement = separatorElements[0];
+                        if (keys.includes(firstSeparatorElement) && data[index][firstSeparatorElement] !== undefined) {
+                            node.characters = changeTextByLayerName(node.name, data[index], firstSeparatorElement);
                         }
                     }
                 }
@@ -111,7 +137,7 @@ figma.ui.onmessage = msg => {
                     for (const key of keys) {
                         // Texts
                         // Find elements in selection that match any key of data
-                        const textLayers = node.findAll(node => node.name === key && node.type === 'TEXT');
+                        const textLayers = node.findAll(node => node.name.indexOf(key) >= 0 && node.type === 'TEXT');
                         // Rewrite layer text with value of each key but go the next index if key doubles
                         if (iterate === true) {
                             for (const layer of textLayers) {
@@ -124,7 +150,27 @@ figma.ui.onmessage = msg => {
                                 }
                                 // If index reached its end
                                 index = (index >= length) ? 0 : index;
-                                layer.characters = datasets[activeTabIndex][index][key].toString();
+                                /**
+                                 * Replace Function Text based on key in object
+                                 * 1. Direct hit
+                                 * 2. Virtual hit (based on object structure)
+                                 */
+                                const _isAvailable = keys.includes(layer.name);
+                                const _isSet = datasets[activeTabIndex][index][layer.name] !== undefined;
+                                const _isNoObject = typeof datasets[activeTabIndex][index][layer.name] !== 'object';
+                                const _separatorInName = layer.name.indexOf(depthSeparator) >= 0;
+                                // 1. Direct hit (doesn't matter of separators)
+                                if (_isAvailable && _isSet && _isNoObject) {
+                                    layer.characters = datasets[activeTabIndex][index][layer.name].toString();
+                                    // 2. First Level hit (separator is only virtual)
+                                }
+                                else if (_separatorInName) {
+                                    let separatorElements = layer.name.split(depthSeparator);
+                                    let firstSeparatorElement = separatorElements[0];
+                                    if (keys.includes(firstSeparatorElement) && datasets[activeTabIndex][index][firstSeparatorElement] !== undefined) {
+                                        layer.characters = changeTextByLayerName(layer.name, datasets[activeTabIndex][index], firstSeparatorElement);
+                                    }
+                                }
                                 // Add key to used keys
                                 usedKeys.push(key);
                             }
@@ -133,13 +179,65 @@ figma.ui.onmessage = msg => {
                         else {
                             for (const layer of textLayers) {
                                 yield loadFontsFrom(layer);
-                                layer.characters = datasets[activeTabIndex][index][key].toString();
+                                /**
+                                 * Replace Function Text based on key in object
+                                 * 1. Direct hit
+                                 * 2. Virtual hit (based on object structure)
+                                 */
+                                const _isAvailable = keys.includes(layer.name);
+                                const _isSet = datasets[activeTabIndex][index][layer.name] !== undefined;
+                                const _isNoObject = typeof datasets[activeTabIndex][index][layer.name] !== 'object';
+                                const _separatorInName = layer.name.indexOf(depthSeparator) >= 0;
+                                // 1. Direct hit (doesn't matter of separators)
+                                if (_isAvailable && _isSet && _isNoObject) {
+                                    layer.characters = datasets[activeTabIndex][index][layer.name].toString();
+                                    // 2. First Level hit (separator is only virtual)
+                                }
+                                else if (_separatorInName) {
+                                    let separatorElements = layer.name.split(depthSeparator);
+                                    let firstSeparatorElement = separatorElements[0];
+                                    if (keys.includes(firstSeparatorElement) && datasets[activeTabIndex][index][firstSeparatorElement] !== undefined) {
+                                        layer.characters = changeTextByLayerName(layer.name, datasets[activeTabIndex][index], firstSeparatorElement);
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
         });
+    }
+    /**
+     * Functions for Depth Separator
+     * ---------------------
+     */
+    function traverseMultiLayerObject(baseObject, keysArray) {
+        if (keysArray.length > 0) {
+            const obj = baseObject[keysArray[0]];
+            const array = keysArray.slice(1);
+            traverseMultiLayerObject(obj, array);
+        }
+        else {
+            nestedObjectName = baseObject;
+            return baseObject;
+        }
+    }
+    function changeTextByLayerName(objProperty, data, key) {
+        // If property doesn't exist, return old content
+        if (objProperty === undefined && typeof objProperty !== 'string') {
+            return objProperty;
+        }
+        if (objProperty === key) {
+            if (data[key]) {
+                return data[key].toString();
+            }
+        }
+        else if (objProperty.indexOf(depthSeparator) > 1) {
+            nestedObjectName = '';
+            const nameAsObjectProperty = objProperty.split(depthSeparator);
+            traverseMultiLayerObject(data, nameAsObjectProperty);
+            return nestedObjectName;
+        }
     }
     function notifyWarning(data, text) {
         if (msg.data === data) {

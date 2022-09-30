@@ -22,9 +22,12 @@
                 <!-- Input: Fetch file from url (JSON only) -->
                 <label class="inactive-csv" for="data">URL:</label>
                 <input class="inactive-csv" id="data" name="data" placeholder="https://path/to/public/data.json" />
+                <div class="break-100"></div>
+                <label class="inactive-csv" for="depth-separator">Depth separator for layer naming¹:</label>
+                <input class="inactive-csv" id="depth-separator" name="depth-separator" placeholder="-" value="-" minlength="1" />
 
                 <!-- Input: Separator (CSV only)  -->
-                <label class="inactive-json" for="separator">Separator¹:</label>
+                <label class="inactive-json" for="separator">Separator²:</label>
                 <input class="inactive-json" id="separator" name="separator" placeholder="," value="," maxlength="1" />
                 <input class="inactive-json" id="ignore" name="ignore" placeholder="But ignore between ..." maxlength="1" />
 
@@ -52,8 +55,24 @@
             </div>
         </div>
 
-        <p class="container introduction-text inactive-csv" id="intro-json">Overwrite multiple text layers with real and coherent data. Upload your file, select a group or a frame and click “Random” or a specific dataset from the list you'll receive.<br/><br/><b>New:</b> Click “Iterate” to apply multiple entries of your list to your selection. The next entry will be used as soon as the same data would be applied a second time.</p>
-        <p class="container introduction-text inactive-json" id="intro-csv">¹ Most .csv files are separated by <b>,</b> or by <b>;</b><br/>The default value is <b>,</b><br/><br/>Optionally you can pass a character that indicates when the character you've set to be your separator should be printed, for example when it's surrounded by <b>"</b>. So a number like 1,000 can be printed within a comma-separated .csv if you write "1,000" instead.<br/>The default value is <b>"</b></p>
+        <p class="container introduction-text inactive-csv" id="intro-json">
+            <span class="example">
+                Find data examples on how to structure your files in my <a href="https://github.com/Lucsy3012/figma-json-to-content/tree/master/example" target="_blank">open repository</a>.
+            </span>
+            Overwrite multiple text layers with real and coherent data. Upload your file, select a group or a frame and click “Random” or a specific dataset from the list you'll receive.<br/><br/>
+            <b>New:</b> The depth separator¹ for .json files allows you to use multi-layered objects instead of putting all properties on the first layer. Define which character you want to use as part of the layer name to display the depth with the separator. Try to avoid the separator as part of your multi-layered object properties. The default value is <b>-</b>.<br/><br/>
+            <b>For example:</b><br/>
+            The layer name "select-label" will receive the text contents "Label of title" with the following .json:<br/>
+<span class="code">[
+  {
+    "select": {
+      "title": "My title",
+      "label": "Label of title"
+    }
+  }
+]</span>
+        </p>
+        <p class="container introduction-text inactive-json" id="intro-csv">² Most .csv files are separated by <b>,</b> or by <b>;</b><br/>The default value is <b>,</b><br/><br/>Optionally you can pass a character that indicates when the character you've set to be your separator should be printed, for example when it's surrounded by <b>"</b>. So a number like 1,000 can be printed within a comma-separated .csv if you write "1,000" instead.<br/>The default value is <b>"</b></p>
     </div>
 
     <div class="container">
@@ -139,6 +158,22 @@
     p.container {
         margin: 0;
     }
+    p .code {
+        display: block;
+        white-space: pre-wrap;
+        font-family: monospace;
+        margin-top: 12px;
+        padding: 10px;
+        border-radius: 4px;
+        background: var(--light-gray);
+    }
+    p .example {
+        display: block;
+        margin-bottom: 12px;
+        padding: 8px 14px;
+        border-radius: 4px;
+        background: var(--light-gray);
+    }
     p:empty,
     ul:empty {
         display: none;
@@ -191,6 +226,12 @@
     .loading-panel button,
     .loading-panel .btn {
         flex: auto;
+    }
+
+    .loading-panel input#depth-separator {
+        max-width: 45px;
+        margin-left: auto;
+        text-align: center;
     }
 
     .loading-panel input#separator {
@@ -542,8 +583,9 @@
             fr.onload = function (e) {
                 try {
                     const data = JSON.parse(e.target.result);
+                    const depthSeparator = returnValueFromID('depth-separator', '-');
 
-                    acceptAndSendData(parent, data, activeTabIndex);
+                    acceptAndSendData(parent, data, activeTabIndex, depthSeparator);
 
                     // Rename button
                     document.querySelector('#data-tabs [data-id="' + activeTabIndex + '"]').textContent = files[0].name.split('.')[0];
@@ -573,7 +615,8 @@
                 if (data.success === false) {
                     errorMsg.innerHTML = 'You have no permission to fetch this data. Please provide an URL that\'s publicly available.';
                 } else {
-                    acceptAndSendData(parent, data, activeTabIndex);
+                    const depthSeparator = returnValueFromID('depth-separator', '-');
+                    acceptAndSendData(parent, data, activeTabIndex, depthSeparator);
                 }
             })
             .catch(error => {
@@ -593,15 +636,20 @@
         parent.postMessage({ pluginMessage: { type: 'iterate' } }, '*')
     };
 
+    document.getElementById('depth-separator').onblur = () => {
+        const depthSeparator = returnValueFromID('depth-separator', '-');
+        parent.postMessage({ pluginMessage: { type: 'depth-separator-changed', depthSeparator } }, '*')
+    };
+
     /*
      * Data functions
      * -----------------------
      */
 
-    function acceptAndSendData(parent, data, activeTabIndex) {
+    function acceptAndSendData(parent, data, activeTabIndex, depthSeparator) {
 
         // post data to ui
-        parent.postMessage({ pluginMessage: { type: 'load', data, activeTabIndex } }, '*');
+        parent.postMessage({ pluginMessage: { type: 'load', data, activeTabIndex, depthSeparator } }, '*');
 
         // remove all entries from list
         document.querySelector('.entries[data-id="' + activeTabIndex + '"]').innerHTML = '';
@@ -635,11 +683,11 @@
         let data = [];
         let keys = lines[0];
 
-        for (var i = 1; i <= (lines.length - 1); i++) {
+        for (let i = 1; i <= (lines.length - 1); i++) {
 
-            var obj = {};
+            let obj = {};
 
-            for (var a = 0; a <= lines[i].length; a++) {
+            for (let a = 0; a <= lines[i].length; a++) {
                 const key = keys[a];
                 const value = lines[i][a];
 
@@ -698,7 +746,7 @@
         }
     });
 
-    // enter rewritting mode
+    // enter rewriting mode
     document.addEventListener('dblclick', function(e) {
         if (e.target.matches('.tab[data-id]')) {
             rewriteTab(e, true);
@@ -738,7 +786,7 @@
             activeTabIndex = parseInt(e.target.attributes['data-id'].textContent);
 
             // rewrite active tab
-            for (i = 0; i < tabs.length; ++i) {
+            for (let i = 0; i < tabs.length; ++i) {
                 tabs[i].classList.remove('active');
                 entriesLists[i].classList.remove('active');
 
@@ -775,7 +823,6 @@
     }
 
     function addTab() {
-        console.log({activeTabIndex}, {createdTabs});
         createdTabs++;
 
         let newTab = document.createElement('span');
@@ -798,7 +845,7 @@
     function deleteTab(e) {
         const clickedTabIndex = parseInt(e.target.attributes['data-id'].textContent);
 
-        for (i = 0; i < tabs.length; ++i) {
+        for (let i = 0; i < tabs.length; ++i) {
             if (tabs[i].matches('[data-id="' + clickedTabIndex + '"]')) {
                 tabs[i].remove();
             }
@@ -867,7 +914,12 @@
                     dt.title = value;
                     dl.appendChild(dt);
 
-                    dd.innerHTML = entry[value];
+                    if (typeof entry[value] === 'object') {
+                        dd.innerHTML = 'Multiple layers';
+                    } else {
+                        dd.innerHTML = entry[value];
+                    }
+
                     dl.appendChild(dd);
                 }
 
